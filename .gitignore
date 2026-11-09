@@ -35,3 +35,4 @@ go.work.sum
 # Existing materials like rulebooks, data and example code
 exam_docs/
 existing/
+bin/
