@@ -5,5 +5,5 @@ type Card struct {
 	Site    byte
 	Region  string
 	Value   int
-	Symbols map[SymbolCategory]Symbol
+	Symbols map[Category]*Symbol
 }
