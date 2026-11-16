@@ -1,0 +1,110 @@
+@startuml classes
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam nodesep 25
+skinparam ranksep 45
+hide empty members
+left to right direction
+
+package agent {
+  class HumanController
+  class BotController
+  class RemoteController
+}
+package ui {
+  class TextUI
+}
+package net {
+  interface Transport {
+    Send(m Message) error
+    Receive() (Message, error)
+  }
+  class TCPTransport
+}
+package engine {
+  class Game {
+    Play() Result
+  }
+  interface PlayerController {
+    ChooseThrow(hand) Card
+    ChooseDraft(hand) Card
+    ChooseActivity(options) (Activity, bool)
+  }
+  interface Listener {
+    OnEvent(e Event)
+  }
+  class Result {
+    Ranking : []PlayerState
+    Winner : int
+  }
+}
+package edition {
+  interface Edition {
+    Cards() []Card
+    Rules() []ScoringRule
+    Passing() PassingStrategy
+    Rounds() int
+  }
+  class "australia.Australia" as Australia
+}
+package core {
+  interface ScoringRule {
+    Category() Category
+    Score(p, all []PlayerState) int
+  }
+  interface PassingStrategy {
+    Target(round, seat, n) int
+    CatchTarget(round, seat, n) int
+  }
+  class PlayerState {
+    Hand, Draft : []Card
+    VisitedSites, ScoredActivities
+  }
+  class ScoreSheet {
+    Add(round, category, points)
+    CategoryTotal(category) int
+    Total() int
+  }
+  class Deck {
+    Shuffle(rng)
+    Deal(n) []Card
+  }
+  class Card {
+    Name, Site, Region : string
+    Number : int
+    Symbols : map[Category]Symbol
+  }
+}
+package scoring {
+  class "ThrowCatch, Sites, RegionBonus,\nCollections, Animals, Activities" as Rules <<ScoringRule>>
+  class "Clockwise, Alternating (req. 13)" as Passings <<PassingStrategy>>
+}
+
+HumanController ..|> PlayerController
+BotController ..|> PlayerController
+RemoteController ..|> PlayerController
+RemoteController --> Transport
+HumanController --> TextUI
+TCPTransport ..|> Transport
+TextUI ..|> Listener
+
+Game --> "2..4" PlayerController
+Game --> Listener
+Game --> Edition
+Game *-- "2..4" PlayerState
+Game ..> Result
+Game --> Deck
+
+Australia ..|> Edition
+Australia ..> Rules : creates
+Edition ..> ScoringRule
+Edition ..> PassingStrategy
+
+Rules ..|> ScoringRule
+Passings ..|> PassingStrategy
+PlayerState *-- ScoreSheet
+PlayerState o-- Card
+Deck o-- "28" Card
+@enduml

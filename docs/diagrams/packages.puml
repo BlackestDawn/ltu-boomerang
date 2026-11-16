@@ -1,0 +1,44 @@
+@startuml packages
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam packageStyle folder
+top to bottom direction
+
+package "cmd/boomerang\n<<composition root>>" as main {
+}
+package "agent" as agent {
+}
+package "ui" as ui {
+}
+package "net" as net {
+}
+package "engine" as engine {
+}
+package "edition/australia" as aus {
+}
+package "edition" as edition {
+}
+package "scoring" as scoring {
+}
+package "core" as core {
+}
+
+main ..> agent
+main ..> ui
+main ..> net
+main ..> engine
+main ..> aus
+agent ..> engine : implements\nPlayerController
+agent ..> ui
+agent ..> net
+ui ..> engine : implements\nListener
+net ..> core
+engine ..> edition
+engine ..> core
+aus ..> edition
+aus ..> scoring
+edition ..> core
+scoring ..> core
+@enduml

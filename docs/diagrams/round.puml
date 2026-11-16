@@ -1,0 +1,35 @@
+@startuml round
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+participant Game
+participant Deck
+participant "PassingStrategy" as PS
+participant "PlayerController\n(each player)" as PC
+participant "ScoringRule\n(each rule)" as SR
+participant "Listener\n(UI / network)" as L
+
+Game -> Deck : Shuffle(rng)
+Game -> Deck : Deal(7) per player
+Game -> L : OnEvent(HandsDealt)
+Game -> PC : ChooseThrow(hand)
+PC --> Game : throw card (hidden)
+loop until one card remains in each hand
+  Game -> PS : Target(round, seat, players)
+  PS --> Game : receiving seat
+  Game -> Game : pass hands
+  Game -> PC : ChooseDraft(hand)
+  PC --> Game : drafted card
+  Game -> L : OnEvent(CardsRevealed)
+end
+Game -> PS : CatchTarget(round, seat, players)
+PS --> Game : receiving seat
+Game -> Game : add Catch card to draft
+Game -> PC : ChooseActivity(options)
+PC --> Game : activity or none
+loop for each rule
+  Game -> SR : Score(player, allPlayers)
+  SR --> Game : points
+end
+Game -> L : OnEvent(RoundScored)
+@enduml
