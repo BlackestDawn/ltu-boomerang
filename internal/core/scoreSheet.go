@@ -8,8 +8,8 @@ func (s *ScoreSheet) Add(round int, category Category, points int) {}
 
 func (s *ScoreSheet) CategoryTotal(category Category) int {
 	var total int
-	for i := range len(s.categoryScores[category]) {
-		total += s.categoryScores[category][i]
+	for _, val := range s.categoryScores[category] {
+		total += val
 	}
 	return total
 }

@@ -1,8 +1,8 @@
 package core
 
 type PlayerState struct {
-	Hand             []*Card
-	Draft            []*Card
+	Hand             CardPile
+	Draft            CardPile
 	VisitedSites     []byte
 	ScoredActivities []string
 	ScoreSheet       *ScoreSheet

@@ -23,8 +23,7 @@ func buildRules() map[core.Category]core.ScoringRule {
 }
 
 func scoreThrow(p int, all []*core.PlayerState) int {
-	hand := all[p].Hand
-	diff := hand[0].Value - hand[core.HandSizeDeal-1].Value
+	diff := all[p].Draft.Cards[0].Value - all[p].Draft.Cards[core.HandSize-1].Value
 	if diff < 0 {
 		return -diff
 	}
@@ -33,7 +32,7 @@ func scoreThrow(p int, all []*core.PlayerState) int {
 
 func scoreSite(p int, all []*core.PlayerState) int {
 	var score int
-	for _, card := range all[p].Hand {
+	for _, card := range all[p].Draft.Cards {
 		if !slices.Contains(all[p].VisitedSites, card.Site) {
 			score++
 		}
@@ -49,7 +48,7 @@ func scoreRegion(p int, all []*core.PlayerState) int {
 
 func scoreCollection(p int, all []*core.PlayerState) int {
 	var score int
-	for _, card := range all[p].Hand {
+	for _, card := range all[p].Draft.Cards {
 		coll, ok := card.Symbols[core.Collection]
 		if ok {
 			score += coll.Value
@@ -64,7 +63,7 @@ func scoreCollection(p int, all []*core.PlayerState) int {
 func scoreAnimal(p int, all []*core.PlayerState) int {
 	var score int
 	animals := make(map[*core.Symbol]int)
-	for _, card := range all[p].Hand {
+	for _, card := range all[p].Draft.Cards {
 		ani, ok := card.Symbols[core.Animal]
 		if ok {
 			_, exists := animals[ani]
