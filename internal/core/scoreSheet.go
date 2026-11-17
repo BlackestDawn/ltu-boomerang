@@ -1,14 +1,14 @@
 package core
 
 type ScoreSheet struct {
-	categoryScores map[Category][]int
+	CategoryScores map[Category][]int
 }
 
 func (s *ScoreSheet) Add(round int, category Category, points int) {}
 
 func (s *ScoreSheet) CategoryTotal(category Category) int {
 	var total int
-	for _, val := range s.categoryScores[category] {
+	for _, val := range s.CategoryScores[category] {
 		total += val
 	}
 	return total
