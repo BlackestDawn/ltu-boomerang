@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 
 	"github.com/BlackestDawn/ltu-boomerang/internal/agent"
@@ -11,9 +12,14 @@ import (
 func buildControllers(cfg *Config, ui *ui.TextUI, rng *rand.Rand) []engine.PlayerController {
 	var participants []engine.PlayerController
 	participants = append(participants, agent.NewHumanController(ui))
-	for i := 0; i < *cfg.BotCount; i++ {
-		participants = append(participants, agent.NewBotController(rng))
+	if cfg.BotCount != nil {
+		for i := 0; i < *cfg.BotCount; i++ {
+			participants = append(participants, agent.NewBotController(rng))
+		}
 	}
-	// TODO: add remote players
+	if *cfg.PlayerCount > 1 {
+		fmt.Println("Waiting for remote players to connect")
+		// TODO: add remote players
+	}
 	return participants
 }

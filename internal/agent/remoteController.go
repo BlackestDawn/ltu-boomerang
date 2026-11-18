@@ -6,12 +6,12 @@ import (
 )
 
 type RemoteController struct {
-	net *net.Transport
+	net net.Transport
 }
 
 func NewRemoteController() *RemoteController {
 	return &RemoteController{
-		net: nil,
+		net: &net.TCPTransport{},
 	}
 }
 
