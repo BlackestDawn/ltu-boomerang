@@ -12,3 +12,9 @@ const (
 	Activity   // Optional scoring once per icon, blue symbol
 	TieBreaker
 )
+
+var CatStrings map[Category]string
+
+func (c Category) String() string {
+	return CatStrings[c]
+}
