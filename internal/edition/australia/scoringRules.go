@@ -62,18 +62,7 @@ func scoreCollection(p int, all []*core.PlayerState) int {
 
 func scoreAnimal(p int, all []*core.PlayerState) int {
 	var score int
-	animals := make(map[*core.Symbol]int)
-	for _, card := range all[p].Draft.Cards {
-		ani, ok := card.Symbols[core.Animal]
-		if ok {
-			_, exists := animals[ani]
-			if exists {
-				animals[ani]++
-			} else {
-				animals[ani] = 1
-			}
-		}
-	}
+	animals := core.FilterSymbolCategoryWithCount(all[p].Draft.Cards, core.Animal)
 	for ani, num := range animals {
 		score += ani.Value * num % 2
 	}
