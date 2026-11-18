@@ -10,7 +10,6 @@ const (
 	Collection // Scoring by total sum, green symbol
 	Animal     // Scoring for each pair, yellow symbol
 	Activity   // Optional scoring once per icon, blue symbol
-	TieBreaker
 )
 
 var CatStrings map[Category]string

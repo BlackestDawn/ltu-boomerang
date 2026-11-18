@@ -13,5 +13,4 @@ var DefaultCatStrings = map[Category]string{
 	Collection:  "Collections",
 	Animal:      "Animals",
 	Activity:    "Activities",
-	TieBreaker:  "Tie Breaker",
 }

@@ -9,7 +9,8 @@ type PlayerState struct {
 	Hand             []*Card
 	Draft            []*Card
 	VisitedSites     []byte
-	ScoredActivities []string
+	ChosenActivity   *Symbol
+	ScoredActivities []*Symbol
 	ScoreSheet       *ScoreSheet
 }
 
@@ -19,7 +20,8 @@ func NewPlayerState() *PlayerState {
 		Hand:             []*Card{},
 		Draft:            []*Card{},
 		VisitedSites:     make([]byte, 0),
-		ScoredActivities: make([]string, 0),
+		ChosenActivity:   nil,
+		ScoredActivities: make([]*Symbol, 0),
 		ScoreSheet: &ScoreSheet{
 			CategoryScores: make(map[Category][]int),
 		},

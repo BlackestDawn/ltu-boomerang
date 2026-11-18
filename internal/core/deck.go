@@ -2,6 +2,7 @@ package core
 
 import (
 	"math/rand"
+	"slices"
 )
 
 type Deck struct {
@@ -15,7 +16,7 @@ func (d *Deck) Shuffle(rng *rand.Rand) {
 }
 
 func (d *Deck) Deal(n int) []*Card {
-	cards := d.Cards[d.lastDealtPos : d.lastDealtPos+n]
+	cards := slices.Clone(d.Cards[d.lastDealtPos : d.lastDealtPos+n])
 	d.lastDealtPos += n
 	return cards
 }

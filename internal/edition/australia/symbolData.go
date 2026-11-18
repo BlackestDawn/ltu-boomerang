@@ -25,7 +25,7 @@ var cardSymbols = map[symbolID]*core.Symbol{
 	wildflowers: {Name: "Wildflowers", Value: 2},
 	shells:      {Name: "Shells", Value: 3},
 	souvenirs:   {Name: "Souvenirs", Value: 5},
-	kangaroos:   {Name: "Kangoroos", Value: 3},
+	kangaroos:   {Name: "Kangaroos", Value: 3},
 	emus:        {Name: "Emus", Value: 4},
 	wombats:     {Name: "Wombats", Value: 5},
 	koalas:      {Name: "Koalas", Value: 7},

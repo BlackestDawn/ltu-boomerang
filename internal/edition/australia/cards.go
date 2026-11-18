@@ -17,7 +17,7 @@ func buildCards() []*core.Card {
 			core.Collection: cardSymbols[shells],
 			core.Animal:     cardSymbols[kangaroos],
 		}},
-		{Name: "Kalbarri Nation Park", Site: 'D', Region: regionNames[0], Value: 1, Symbols: map[core.Category]*core.Symbol{
+		{Name: "Kalbarri National Park", Site: 'D', Region: regionNames[0], Value: 1, Symbols: map[core.Category]*core.Symbol{
 			core.Collection: cardSymbols[wildflowers],
 			core.Activity:   cardSymbols[bushwalking],
 		}},
@@ -29,13 +29,13 @@ func buildCards() []*core.Card {
 			core.Animal:   cardSymbols[wombats],
 			core.Activity: cardSymbols[sightseeing],
 		}},
-		{Name: "Nitmiliku National Park", Site: 'G', Region: regionNames[1], Value: 4, Symbols: map[core.Category]*core.Symbol{
+		{Name: "Nitmiluk National Park", Site: 'G', Region: regionNames[1], Value: 4, Symbols: map[core.Category]*core.Symbol{
 			core.Collection: cardSymbols[shells],
-			core.Animal:     cardSymbols[koalas],
+			core.Animal:     cardSymbols[platypuses],
 		}},
 		{Name: "King's Canyon", Site: 'H', Region: regionNames[1], Value: 4, Symbols: map[core.Category]*core.Symbol{
-			core.Animal:     cardSymbols[koalas],
-			core.Collection: cardSymbols[swimming],
+			core.Animal:   cardSymbols[koalas],
+			core.Activity: cardSymbols[swimming],
 		}},
 		{Name: "The Great Barrier Reef", Site: 'I', Region: regionNames[2], Value: 6, Symbols: map[core.Category]*core.Symbol{
 			core.Collection: cardSymbols[wildflowers],
@@ -93,7 +93,7 @@ func buildCards() []*core.Card {
 			core.Collection: cardSymbols[leaves],
 			core.Activity:   cardSymbols[indigenous],
 		}},
-		{Name: "Twwelve Apostles", Site: 'W', Region: regionNames[5], Value: 2, Symbols: map[core.Category]*core.Symbol{
+		{Name: "Twelve Apostles", Site: 'W', Region: regionNames[5], Value: 2, Symbols: map[core.Category]*core.Symbol{
 			core.Collection: cardSymbols[shells],
 			core.Activity:   cardSymbols[swimming],
 		}},

@@ -2,6 +2,7 @@ package agent
 
 import (
 	"math/rand"
+	"slices"
 
 	"github.com/BlackestDawn/ltu-boomerang/internal/core"
 )
@@ -26,18 +27,18 @@ func (c *BotController) ChooseDraft(hand []*core.Card) *core.Card {
 	return hand[num]
 }
 
-func (c *BotController) ChooseActivity(hand []*core.Card) (*core.Symbol, bool) {
+func (c *BotController) ChooseActivity(hand []*core.Card, alreadyScored []*core.Symbol) *core.Symbol {
 	activities := core.FilterSymbolCategoryWithCount(hand, core.Activity)
 	var retSymbol *core.Symbol
 	var top int = 0
 	for symbol, num := range activities {
+		if slices.Contains(alreadyScored, symbol) {
+			continue
+		}
 		if num > top {
 			top = num
 			retSymbol = symbol
 		}
 	}
-	if retSymbol == nil {
-		return nil, false
-	}
-	return retSymbol, true
+	return retSymbol
 }

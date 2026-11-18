@@ -18,7 +18,6 @@ func buildRules() map[core.Category]core.ScoringRule {
 		core.Collection:  scoringFunc(scoreCollection),
 		core.Animal:      scoringFunc(scoreAnimal),
 		core.Activity:    scoringFunc(scoreActivity),
-		core.TieBreaker:  scoringFunc(scoreTiebreaker),
 	}
 }
 
@@ -42,7 +41,23 @@ func scoreSite(p int, all []*core.PlayerState) int {
 
 func scoreRegion(p int, all []*core.PlayerState) int {
 	var score int
-
+REGIONSET:
+	for _, set := range regionClusters {
+		for _, state := range all {
+			if core.SliceIsSubset(set, state.VisitedSites) {
+				continue REGIONSET
+			}
+		}
+		allVisited := slices.Clone(all[p].VisitedSites)
+		for _, card := range all[p].Draft {
+			if !slices.Contains(allVisited, card.Site) {
+				allVisited = append(allVisited, card.Site)
+			}
+		}
+		if core.SliceIsSubset(set, allVisited) {
+			score += 3
+		}
+	}
 	return score
 }
 
@@ -64,24 +79,23 @@ func scoreAnimal(p int, all []*core.PlayerState) int {
 	var score int
 	animals := core.FilterSymbolCategoryWithCount(all[p].Draft, core.Animal)
 	for ani, num := range animals {
-		score += ani.Value * num % 2
+		score += ani.Value * (num / 2)
 	}
 	return score
 }
+
+var activityPoints = []int{0, 0, 2, 4, 7, 10, 15}
 
 func scoreActivity(p int, all []*core.PlayerState) int {
-	var score int
-
-	return score
-}
-
-func scoreTiebreaker(p int, all []*core.PlayerState) int {
-	var playerId int
-	var currentHigh int
-	for id, player := range all {
-		if player.ScoreSheet.CategoryTotal(core.ThrowCatch) > currentHigh {
-			playerId = id
+	choice := all[p].ChosenActivity
+	if choice == nil || slices.Contains(all[p].ScoredActivities, choice) {
+		return 0
+	}
+	var count int
+	for _, card := range all[p].Draft {
+		if card.Symbols[core.Activity] == choice {
+			count++
 		}
 	}
-	return playerId
+	return activityPoints[count]
 }

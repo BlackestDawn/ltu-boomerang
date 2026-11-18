@@ -3,6 +3,7 @@ package engine
 import (
 	"fmt"
 	"math/rand"
+	"slices"
 	"sync"
 
 	"github.com/BlackestDawn/ltu-boomerang/internal/core"
@@ -20,18 +21,25 @@ type Game struct {
 	passing      core.PassingStrategy
 }
 
-func (g *Game) Play() Result {
+func (g *Game) Play() core.Result {
 	fmt.Println("Starting game session")
 	var wg sync.WaitGroup
 
-	for round := range core.NumRounds { // Initialize deck, hands and choose throw card
+	for round := range core.NumRounds {
+		// (RE-)Initialize deck
 		g.deck = &core.Deck{Cards: g.edition.Cards()}
 		g.deck.Shuffle(g.rng)
 		fmt.Println("Selecting throw card")
-		for i := 0; i < len(g.players); i++ {
+
+		// Deal new hand and reset round-specific data
+		for i := range g.players {
 			g.playerStates[i].Hand = g.deck.Deal(core.HandSize)
+			g.playerStates[i].Draft = g.playerStates[i].Draft[:0]
+			g.playerStates[i].ChosenActivity = nil
 		}
-		for i := 0; i < len(g.players); i++ {
+
+		// Choose the throw card
+		for i := range g.players {
 			wg.Go(func() {
 				card := g.players[i].ChooseThrow(g.playerStates[i].Hand)
 				g.playerStates[i].MoveCardToDraft(card)
@@ -43,42 +51,61 @@ func (g *Game) Play() Result {
 		for len(g.playerStates[0].Hand) > 1 {
 			fmt.Println("selecting draft card, remaining in hand:", len(g.playerStates[0].Hand))
 			g.PassHands(round)
-			for i := 0; i < len(g.players); i++ {
+			for i := range g.players {
 				wg.Go(func() {
 					card := g.players[i].ChooseDraft(g.playerStates[i].Hand)
 					g.playerStates[i].MoveCardToDraft(card)
 					g.events.OnEvent(core.Event{
 						Type: core.CardsRevelead,
-						Data: g.playerStates[i].Draft,
+						Data: slices.Clone(g.playerStates[i].Draft[1:]),
 					})
 				})
 			}
 			wg.Wait()
 		}
 
-		// One card left, pass it and automatically add to draft
-		// then calculate the rounds scores
+		// One card left, pass it around and automatically add to draft as catch card
+		// Then calculate the rounds scores
 		g.PassHands(round)
-		for i := 0; i < len(g.playerStates); i++ {
-			g.playerStates[i].MoveCardToDraft(g.playerStates[i].Hand[0])
-			activity, _ := g.players[i].ChooseActivity(g.playerStates[i].Draft)
-			scoring.ScoreRound(g.playerStates[i], g.edition.Rules(), activity)
+		for i := range g.players {
+			wg.Go(func() {
+				g.playerStates[i].MoveCardToDraft(g.playerStates[i].Hand[0])
+				g.events.OnEvent(core.Event{
+					Type: core.CardsRevelead,
+					Data: slices.Clone(g.playerStates[i].Draft),
+				})
+				g.playerStates[i].ChosenActivity = g.players[i].ChooseActivity(g.playerStates[i].Draft, g.playerStates[i].ScoredActivities)
+			})
 		}
+		wg.Wait()
+		scoring.ScoreRound(round, g.playerStates, g.edition.Rules())
+
+		g.UpdateEndOfRound()
 	}
 
-	return Result{
-		Ranking: g.playerStates,
-		Winner:  0,
-	}
+	return scoring.ScoreFinal(g.playerStates, g.edition.TieBreaker)
 }
 
 func (g *Game) PassHands(round int) {
 	targets := make([][]*core.Card, len(g.playerStates))
-	for i := 0; i < len(g.playerStates); i++ {
+	for i := range g.players {
 		to := g.passing.Target(round, i, len(g.playerStates))
 		targets[to] = g.playerStates[i].Hand
 	}
 	for i := 0; i < len(g.playerStates); i++ {
 		g.playerStates[i].Hand = targets[i]
+	}
+}
+
+func (g *Game) UpdateEndOfRound() {
+	for _, state := range g.playerStates {
+		for _, card := range state.Draft {
+			if !slices.Contains(state.VisitedSites, card.Site) {
+				state.VisitedSites = append(state.VisitedSites, card.Site)
+			}
+		}
+		if state.ChosenActivity != nil {
+			state.ScoredActivities = append(state.ScoredActivities, state.ChosenActivity)
+		}
 	}
 }

@@ -10,6 +10,5 @@ func GetCategoryStrings() map[core.Category]string {
 		core.Collection:  "Collections",
 		core.Animal:      "Animals",
 		core.Activity:    "Activity",
-		core.TieBreaker:  "Tie Breaker",
 	}
 }
