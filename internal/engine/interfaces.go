@@ -3,7 +3,7 @@ package engine
 import "github.com/BlackestDawn/ltu-boomerang/internal/core"
 
 type Listener interface {
-	OnEvent(e Event)
+	OnEvent(e core.Event)
 }
 
 type PlayerController interface {

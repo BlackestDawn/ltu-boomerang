@@ -1,3 +1,3 @@
-package engine
+package core
 
 type Event struct{}
