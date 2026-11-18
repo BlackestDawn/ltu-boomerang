@@ -17,6 +17,6 @@ func NewGame(ed edition.Edition, players []PlayerController, rng *rand.Rand, pas
 		playerStates: states,
 		edition:      ed,
 		rng:          rng,
-		passing:      core.NewPassing(passingDir),
+		passing:      core.NewPassingStrategy(passingDir),
 	}
 }

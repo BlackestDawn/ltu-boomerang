@@ -51,4 +51,13 @@ func (g *Game) Play() Result {
 	return Result{}
 }
 
-func (g *Game) PassHands(round, seat int) {}
+func (g *Game) PassHands(round, seat int) {
+	targets := make([][]*core.Card, len(g.playerStates))
+	for i := 0; i < len(g.playerStates); i++ {
+		to := g.passing.Target(round, i, len(g.playerStates))
+		targets[to] = g.playerStates[i].Hand.Cards
+	}
+	for i := 0; i < len(g.playerStates); i++ {
+		g.playerStates[i].Hand.Set(targets[i])
+	}
+}
