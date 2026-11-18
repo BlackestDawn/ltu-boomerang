@@ -1,8 +1,10 @@
 package engine
 
-import "github.com/BlackestDawn/ltu-boomerang/internal/core"
+import (
+	"github.com/BlackestDawn/ltu-boomerang/internal/core"
+)
 
 type Result struct {
-	Ranking []core.PlayerState
+	Ranking []*core.PlayerState
 	Winner  int
 }

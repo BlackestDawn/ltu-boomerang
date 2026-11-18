@@ -3,9 +3,11 @@ package engine
 import (
 	"fmt"
 	"math/rand"
+	"sync"
 
 	"github.com/BlackestDawn/ltu-boomerang/internal/core"
 	"github.com/BlackestDawn/ltu-boomerang/internal/edition"
+	"github.com/BlackestDawn/ltu-boomerang/internal/scoring"
 )
 
 type Game struct {
@@ -20,44 +22,63 @@ type Game struct {
 
 func (g *Game) Play() Result {
 	fmt.Println("Starting game session")
-	round, seat := 1, 1
+	var wg sync.WaitGroup
 
-	// Round
-	g.deck = &core.Deck{Cards: g.edition.Cards()}
-	g.deck.Shuffle(g.rng)
-	for i := 0; i < len(g.players); i++ {
+	for round := range core.NumRounds { // Initialize deck, hands and choose throw card
+		g.deck = &core.Deck{Cards: g.edition.Cards()}
+		g.deck.Shuffle(g.rng)
 		fmt.Println("Selecting throw card")
-		// TODO: make into go routine
-		g.playerStates[i].Hand.Set(g.deck.Deal(core.HandSize))
-		card := g.players[i].ChooseThrow(g.playerStates[i].Hand.Cards)
-		g.playerStates[i].Hand.Remove(card)
-		g.playerStates[i].Draft.Add(card)
-	}
-
-	for len(g.playerStates[0].Hand.Cards) > 1 {
-		fmt.Println("selecting draft card, remaining in hand:", len(g.playerStates[0].Hand.Cards))
-		g.PassHands(round, seat)
 		for i := 0; i < len(g.players); i++ {
-			// TODO: make into go routine
-			card := g.players[i].ChooseDraft(g.playerStates[i].Hand.Cards)
-			g.playerStates[i].Hand.Remove(card)
-			g.playerStates[i].Draft.Add(card)
+			g.playerStates[i].Hand = g.deck.Deal(core.HandSize)
 		}
-		// g.Listener.OnEvent()
+		for i := 0; i < len(g.players); i++ {
+			wg.Go(func() {
+				card := g.players[i].ChooseThrow(g.playerStates[i].Hand)
+				g.playerStates[i].MoveCardToDraft(card)
+			})
+		}
+		wg.Wait()
+
+		// Draw cards until one remaining
+		for len(g.playerStates[0].Hand) > 1 {
+			fmt.Println("selecting draft card, remaining in hand:", len(g.playerStates[0].Hand))
+			g.PassHands(round)
+			for i := 0; i < len(g.players); i++ {
+				wg.Go(func() {
+					card := g.players[i].ChooseDraft(g.playerStates[i].Hand)
+					g.playerStates[i].MoveCardToDraft(card)
+					g.events.OnEvent(core.Event{
+						Type: core.CardsRevelead,
+						Data: g.playerStates[i].Draft,
+					})
+				})
+			}
+			wg.Wait()
+		}
+
+		// One card left, pass it and automatically add to draft
+		// then calculate the rounds scores
+		g.PassHands(round)
+		for i := 0; i < len(g.playerStates); i++ {
+			g.playerStates[i].MoveCardToDraft(g.playerStates[i].Hand[0])
+			activity, _ := g.players[i].ChooseActivity(g.playerStates[i].Draft)
+			scoring.ScoreRound(g.playerStates[i], g.edition.Rules(), activity)
+		}
 	}
 
-	g.PassHands(round, seat)
-
-	return Result{}
+	return Result{
+		Ranking: g.playerStates,
+		Winner:  0,
+	}
 }
 
-func (g *Game) PassHands(round, seat int) {
+func (g *Game) PassHands(round int) {
 	targets := make([][]*core.Card, len(g.playerStates))
 	for i := 0; i < len(g.playerStates); i++ {
 		to := g.passing.Target(round, i, len(g.playerStates))
-		targets[to] = g.playerStates[i].Hand.Cards
+		targets[to] = g.playerStates[i].Hand
 	}
 	for i := 0; i < len(g.playerStates); i++ {
-		g.playerStates[i].Hand.Set(targets[i])
+		g.playerStates[i].Hand = targets[i]
 	}
 }
