@@ -27,7 +27,7 @@ func main() {
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 	ui := &ui.TextUI{}
 	players := buildControllers(cfg, ui, rng)
-	g := engine.NewGame(ed, players, rng, *cfg.PassingDir)
+	g := engine.NewGame(ed, players, rng, *cfg.PassingDir, *cfg.Rounds)
 
 	result := g.Play()
 

@@ -19,13 +19,14 @@ type Game struct {
 	events       Listener
 	rng          *rand.Rand
 	passing      core.PassingStrategy
+	numRounds    int
 }
 
 func (g *Game) Play() core.Result {
 	fmt.Println("Starting game session")
 	var wg sync.WaitGroup
 
-	for round := range core.NumRounds {
+	for round := range g.numRounds {
 		// (RE-)Initialize deck
 		g.deck = &core.Deck{Cards: g.edition.Cards()}
 		g.deck.Shuffle(g.rng)

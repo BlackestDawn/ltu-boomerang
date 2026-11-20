@@ -7,7 +7,7 @@ import (
 	"github.com/BlackestDawn/ltu-boomerang/internal/edition"
 )
 
-func NewGame(ed edition.Edition, players []PlayerController, rng *rand.Rand, passingDir string) *Game {
+func NewGame(ed edition.Edition, players []PlayerController, rng *rand.Rand, passingDir string, rounds int) *Game {
 	var states []*core.PlayerState
 	for i := 0; i < len(players); i++ {
 		states = append(states, core.NewPlayerState())
@@ -18,5 +18,6 @@ func NewGame(ed edition.Edition, players []PlayerController, rng *rand.Rand, pas
 		edition:      ed,
 		rng:          rng,
 		passing:      core.NewPassingStrategy(passingDir),
+		numRounds:    rounds,
 	}
 }

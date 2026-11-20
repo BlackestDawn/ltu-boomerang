@@ -14,6 +14,7 @@ type Config struct {
 	PassingDir  *string
 	PlayerCount *int
 	BotCount    *int
+	Rounds      *int
 }
 
 func (c *Config) cleanup() {
@@ -23,11 +24,58 @@ func (c *Config) cleanup() {
 func buildConfig(args []string) (*Config, error) {
 	parser := argparse.NewParser("boomerang", "Boomerang Cardgame")
 
-	edition := parser.Selector("e", "edition", []string{"AU", "EU", "US"}, &argparse.Options{Help: "Select which edition to use", Default: "AU"})
-	passing := parser.Selector("d", "direction", []string{"left", "alternate", "right"}, &argparse.Options{Help: "Direction to pass cards during each round", Default: "left"})
-	players := parser.Int("p", "players", &argparse.Options{Help: "Number of players: 1-4", Default: 2, Validate: func(args []string) error { return validateCount(args[0], core.MaxPlayerCount, core.MinPlayerCount) }})
-	bots := parser.Int("b", "bots", &argparse.Options{Help: "Number of bots, can only fill remaining \"player\" slots", Default: 0, Validate: func(args []string) error { return validateCount(args[0], core.MaxPlayerCount-*players, 0) }})
-	connectTo := parser.String("c", "connect", &argparse.Options{Help: "Connect to a remote session. If specified no other option will have any effect"})
+	edition := parser.Selector(
+		"e",
+		"edition",
+		[]string{"AU", "EU", "US"},
+		&argparse.Options{
+			Help:    "Select which edition to use",
+			Default: "AU",
+		},
+	)
+	passing := parser.Selector(
+		"d",
+		"direction",
+		[]string{"left", "alternate", "right"},
+		&argparse.Options{
+			Help:    "Direction to pass cards during each round",
+			Default: "left",
+		},
+	)
+	players := parser.Int(
+		"p",
+		"players",
+		&argparse.Options{
+			Help:     fmt.Sprintf("Number of players: 1-%d", core.MaxPlayerCount),
+			Default:  2,
+			Validate: func(args []string) error { return validateCount(args[0], core.MaxPlayerCount, core.MinPlayerCount) },
+		},
+	)
+	bots := parser.Int(
+		"b",
+		"bots",
+		&argparse.Options{
+			Help:     fmt.Sprintf("Number of bots, can only fill remaining \"player\" slots, max would become %d - player count", core.MaxPlayerCount),
+			Default:  0,
+			Validate: func(args []string) error { return validateCount(args[0], core.MaxPlayerCount-*players, 0) },
+		},
+	)
+	connectTo := parser.String(
+		"c",
+		"connect",
+		&argparse.Options{
+			Help: "Connect to a remote session. If specified no other option will have any effect",
+		},
+	)
+	numRounds := parser.Int(
+		"r",
+		"rounds",
+		&argparse.Options{
+			Help:     fmt.Sprintf("Number of rounds to play: %d-%d", core.MinRounds, core.MaxRounds),
+			Default:  core.MinRounds,
+			Validate: func(args []string) error { return validateCount(args[0], core.MaxRounds, core.MinRounds) },
+		},
+	)
 
 	err := parser.Parse(args)
 	if err != nil {
@@ -40,6 +88,7 @@ func buildConfig(args []string) (*Config, error) {
 		PassingDir:  passing,
 		PlayerCount: players,
 		BotCount:    bots,
+		Rounds:      numRounds,
 	}, nil
 }
 
