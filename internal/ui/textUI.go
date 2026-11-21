@@ -1,41 +1,31 @@
 package ui
 
 import (
-	"fmt"
-	"strconv"
+	"bufio"
+	"io"
+	"sync"
 
 	"github.com/BlackestDawn/ltu-boomerang/internal/core"
-	"github.com/BlackestDawn/ltu-boomerang/internal/engine"
 )
 
 type TextUI struct {
+	out io.Writer
+	in  *bufio.Reader
+
+	mu         sync.Mutex // guards the fields below
+	draftCards map[int][]core.Card
+	numPlayers int
+	round      int         // current round, 0-based
+	totals     map[int]int // running score per player
+	pending    block       // round result screen not yet shown to the player
+	finished   bool        // final results shown, ignore late round results
 }
 
-func (ui *TextUI) OnEvent(e core.Event) {}
-
-func (ui *TextUI) ShowResults(result engine.Result) {}
-
-func (ui *TextUI) AskForNumber(max, min int) int {
-	var okInput bool = false
-	var choice int
-	for !okInput {
-		fmt.Printf("Choose a number between %d and %d: ", min, max)
-		var input string
-		_, err := fmt.Scanln(&input)
-		if err != nil {
-			fmt.Println("Could not properly read input:", err)
-			continue
-		}
-		choice, err = strconv.Atoi(input)
-		if err != nil {
-			fmt.Println("Could not convert input:", err)
-			continue
-		}
-		if choice < min || choice > max {
-			fmt.Println("Input outisde of range:", choice)
-			continue
-		}
-		okInput = true
+func NewTextUI(out io.Writer, in io.Reader) *TextUI {
+	return &TextUI{
+		out:        out,
+		in:         bufio.NewReader(in),
+		draftCards: make(map[int][]core.Card),
+		totals:     make(map[int]int),
 	}
-	return choice
 }

@@ -35,11 +35,12 @@ func main() {
 	es := core.NewEventServer(ctx, eventBus)
 
 	players := buildControllers(cfg, ui, rng, es)
+	ui.SetNumPlayers(len(players))
 	g := engine.NewGame(ed, players, rng, *cfg.PassingDir, *cfg.Rounds, eventBus)
 
 	result := g.Play()
 
-	ui.ShowResults(result)
+	ui.ShowFinalResults(result)
 
 	cfg.cleanup()
 	fmt.Println("Thank you for playing, come again.")

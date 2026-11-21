@@ -1,22 +1,19 @@
 package engine
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/BlackestDawn/ltu-boomerang/internal/core"
 	"github.com/BlackestDawn/ltu-boomerang/internal/scoring"
 )
 
-func (g *Game) Play() scoring.Result {
-	fmt.Println("Starting game session")
+func (g *Game) Play() scoring.SessionResult {
 	var wg sync.WaitGroup
 
 	for round := range g.numRounds {
 		// (RE-)Initialize deck
 		g.deck = &core.Deck{Cards: g.edition.Cards()}
 		g.deck.Shuffle(g.rng)
-		fmt.Println("Selecting throw card")
 
 		// Deal new hand and reset round-specific data
 		for i := range g.players {
@@ -37,7 +34,6 @@ func (g *Game) Play() scoring.Result {
 
 		// Draw cards until one remaining
 		for len(g.playerStates[0].Hand) > 1 {
-			fmt.Println("selecting draft card, remaining in hand:", len(g.playerStates[0].Hand))
 			g.PassHands(round)
 			for i := range g.players {
 				wg.Go(func() {
@@ -60,7 +56,8 @@ func (g *Game) Play() scoring.Result {
 			})
 		}
 		wg.Wait()
-		scoring.ScoreRound(round, g.playerStates, g.edition.Rules())
+		roundScore := scoring.ScoreRound(round, g.playerStates, g.edition.Rules())
+		g.eventBus <- core.RoundScoreEvent(roundScore)
 
 		g.UpdateEndOfRound()
 	}

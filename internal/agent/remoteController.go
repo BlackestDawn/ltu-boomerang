@@ -18,11 +18,11 @@ func NewRemoteController(ev <-chan core.Event) *RemoteController {
 }
 
 func (c *RemoteController) ChooseThrow(hand []*core.Card) *core.Card {
-	return &core.Card{}
+	return hand[0]
 }
 
 func (c *RemoteController) ChooseDraft(hand []*core.Card) *core.Card {
-	return &core.Card{}
+	return hand[0]
 }
 
 func (c *RemoteController) ChooseActivity(hand []*core.Card, alreadyScored []*core.Symbol) *core.Symbol {

@@ -1,6 +1,9 @@
 package agent
 
 import (
+	"slices"
+	"strings"
+
 	"github.com/BlackestDawn/ltu-boomerang/internal/core"
 	"github.com/BlackestDawn/ltu-boomerang/internal/ui"
 )
@@ -28,15 +31,35 @@ func (c *HumanController) forwardEvents() {
 }
 
 func (c *HumanController) ChooseThrow(hand []*core.Card) *core.Card {
-	num := c.ui.AskForNumber(len(hand), 1)
-	return hand[num-1]
+	return hand[c.ui.AskForCard(derefCards(hand), "Choose your throw card")]
 }
 
 func (c *HumanController) ChooseDraft(hand []*core.Card) *core.Card {
-	num := c.ui.AskForNumber(len(hand), 1)
-	return hand[num-1]
+	return hand[c.ui.AskForCard(derefCards(hand), "Choose a card to draft")]
 }
 
 func (c *HumanController) ChooseActivity(hand []*core.Card, alreadyScored []*core.Symbol) *core.Symbol {
-	return nil
+	var options []*core.Symbol
+	counts := core.FilterSymbolCategoryWithCount(hand, core.Activity)
+	for symbol := range counts {
+		if !slices.Contains(alreadyScored, symbol) {
+			options = append(options, symbol)
+		}
+	}
+	if len(options) == 0 {
+		return nil
+	}
+	slices.SortFunc(options, func(a, b *core.Symbol) int { return strings.Compare(a.Name, b.Name) })
+
+	shown := make([]core.Symbol, len(options))
+	shownCounts := make([]int, len(options))
+	for i, o := range options {
+		shown[i] = *o
+		shownCounts[i] = counts[o]
+	}
+	choice := c.ui.AskForActivity(derefCards(hand), shown, shownCounts)
+	if choice < 0 {
+		return nil
+	}
+	return options[choice]
 }
