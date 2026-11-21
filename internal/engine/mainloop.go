@@ -1,0 +1,69 @@
+package engine
+
+import (
+	"fmt"
+	"sync"
+
+	"github.com/BlackestDawn/ltu-boomerang/internal/core"
+	"github.com/BlackestDawn/ltu-boomerang/internal/scoring"
+)
+
+func (g *Game) Play() scoring.Result {
+	fmt.Println("Starting game session")
+	var wg sync.WaitGroup
+
+	for round := range g.numRounds {
+		// (RE-)Initialize deck
+		g.deck = &core.Deck{Cards: g.edition.Cards()}
+		g.deck.Shuffle(g.rng)
+		fmt.Println("Selecting throw card")
+
+		// Deal new hand and reset round-specific data
+		for i := range g.players {
+			g.playerStates[i].Hand = g.deck.Deal(core.HandSize)
+			g.playerStates[i].Draft = g.playerStates[i].Draft[:0]
+			g.playerStates[i].ChosenActivity = nil
+		}
+		g.eventBus <- core.RoundBeginsEvent(round)
+
+		// Choose the throw card
+		for i := range g.players {
+			wg.Go(func() {
+				card := g.players[i].ChooseThrow(g.playerStates[i].Hand)
+				g.playerStates[i].MoveCardToDraft(card)
+			})
+		}
+		wg.Wait()
+
+		// Draw cards until one remaining
+		for len(g.playerStates[0].Hand) > 1 {
+			fmt.Println("selecting draft card, remaining in hand:", len(g.playerStates[0].Hand))
+			g.PassHands(round)
+			for i := range g.players {
+				wg.Go(func() {
+					card := g.players[i].ChooseDraft(g.playerStates[i].Hand)
+					g.playerStates[i].MoveCardToDraft(card)
+					g.eventBus <- core.RevealCardEvent{Player: i, Card: *card}
+				})
+			}
+			wg.Wait()
+		}
+
+		// One card left, pass it around and automatically add to draft as catch card
+		// Then calculate the rounds scores
+		g.PassHands(round)
+		for i := range g.players {
+			wg.Go(func() {
+				g.playerStates[i].MoveCardToDraft(g.playerStates[i].Hand[0])
+				g.eventBus <- core.RevealCardEvent{Player: i, Card: *g.playerStates[i].Draft[len(g.playerStates[i].Draft)-1]}
+				g.playerStates[i].ChosenActivity = g.players[i].ChooseActivity(g.playerStates[i].Draft, g.playerStates[i].ScoredActivities)
+			})
+		}
+		wg.Wait()
+		scoring.ScoreRound(round, g.playerStates, g.edition.Rules())
+
+		g.UpdateEndOfRound()
+	}
+
+	return scoring.ScoreFinal(g.playerStates, g.edition.TieBreaker)
+}

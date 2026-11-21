@@ -6,12 +6,14 @@ import (
 )
 
 type RemoteController struct {
-	net net.Transport
+	net      net.Transport
+	eventBus <-chan core.Event
 }
 
-func NewRemoteController() *RemoteController {
+func NewRemoteController(ev <-chan core.Event) *RemoteController {
 	return &RemoteController{
-		net: &net.TCPTransport{},
+		net:      &net.TCPTransport{},
+		eventBus: ev,
 	}
 }
 

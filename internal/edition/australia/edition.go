@@ -34,3 +34,10 @@ func (e *AustraliaEditionData) TieBreaker(all []*core.PlayerState, score int) in
 	}
 	return topPlayer
 }
+
+func New() *AustraliaEditionData {
+	return &AustraliaEditionData{
+		cards: buildCards(),
+		rules: buildRules(),
+	}
+}

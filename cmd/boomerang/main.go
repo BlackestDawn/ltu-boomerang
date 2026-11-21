@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"os"
 	"time"
 
+	"github.com/BlackestDawn/ltu-boomerang/internal/core"
 	"github.com/BlackestDawn/ltu-boomerang/internal/edition"
 	"github.com/BlackestDawn/ltu-boomerang/internal/engine"
 	"github.com/BlackestDawn/ltu-boomerang/internal/ui"
@@ -25,9 +27,15 @@ func main() {
 
 	ed, err := edition.GetEdition(*cfg.Edition)
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
-	ui := &ui.TextUI{}
-	players := buildControllers(cfg, ui, rng)
-	g := engine.NewGame(ed, players, rng, *cfg.PassingDir, *cfg.Rounds)
+	ui := ui.NewTextUI(os.Stdout, os.Stdin)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	eventBus := make(chan core.Event, 16)
+	es := core.NewEventServer(ctx, eventBus)
+
+	players := buildControllers(cfg, ui, rng, es)
+	g := engine.NewGame(ed, players, rng, *cfg.PassingDir, *cfg.Rounds, eventBus)
 
 	result := g.Play()
 

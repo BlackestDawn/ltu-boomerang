@@ -6,12 +6,24 @@ import (
 )
 
 type HumanController struct {
-	ui *ui.TextUI
+	ui       *ui.TextUI
+	eventBus <-chan core.Event
 }
 
-func NewHumanController(ui *ui.TextUI) *HumanController {
-	return &HumanController{
-		ui: ui,
+// NewHumanController creates a controller and starts forwarding events from
+// ev to the UI. Forwarding stops when ev is closed.
+func NewHumanController(ui *ui.TextUI, ev <-chan core.Event) *HumanController {
+	c := &HumanController{
+		ui:       ui,
+		eventBus: ev,
+	}
+	go c.forwardEvents()
+	return c
+}
+
+func (c *HumanController) forwardEvents() {
+	for e := range c.eventBus {
+		c.ui.OnEvent(e)
 	}
 }
 
