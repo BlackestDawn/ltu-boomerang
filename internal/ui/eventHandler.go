@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"slices"
+
 	"github.com/BlackestDawn/ltu-boomerang/internal/core"
 	"github.com/BlackestDawn/ltu-boomerang/internal/scoring"
 )
@@ -12,6 +14,10 @@ func (ui *TextUI) OnEvent(e core.Event) {
 	case core.RevealCardEvent:
 		ui.mu.Lock()
 		ui.draftCards[ev.Player] = append(ui.draftCards[ev.Player], ev.Card)
+		ui.mu.Unlock()
+	case core.RevealDraftEvent:
+		ui.mu.Lock()
+		ui.draftCards[ev.Player] = slices.Clone(ev.Cards)
 		ui.mu.Unlock()
 	case core.RoundScoreEvent:
 		ui.ShowRoundResult(scoring.RoundScore(ev))

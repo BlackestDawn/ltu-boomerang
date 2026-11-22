@@ -7,26 +7,6 @@ import (
 	"github.com/BlackestDawn/ltu-boomerang/internal/core"
 )
 
-// Table layout settings
-const (
-	localPlayer = 0 // the player sitting at the bottom edge of the table
-	sideColumns = 2 // card columns for players at the left/right edges
-	handColumns = 4 // card columns for the hand shown in the middle
-	tableGap    = 4 // spaces between the side drafts and the middle
-)
-
-const clearScreen = "\033[H\033[2J"
-
-// seat is an edge of the table, as seen from above.
-type seat int
-
-const (
-	seatBottom seat = iota
-	seatLeft
-	seatTop
-	seatRight
-)
-
 // seatOf places players around the table clockwise from the local player, so
 // passing to the next player hands cards to the left.
 func seatOf(player, numPlayers int) seat {

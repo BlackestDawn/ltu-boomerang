@@ -1,5 +1,7 @@
 package core
 
+import "fmt"
+
 // categories used for scoring and symbols
 type Category int
 
@@ -15,5 +17,11 @@ const (
 var CatStrings map[Category]string
 
 func (c Category) String() string {
-	return CatStrings[c]
+	if s, ok := CatStrings[c]; ok {
+		return s
+	}
+	if s, ok := DefaultCatStrings[c]; ok {
+		return s
+	}
+	return fmt.Sprintf("Category %d", int(c))
 }

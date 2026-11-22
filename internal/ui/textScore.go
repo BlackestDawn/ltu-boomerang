@@ -39,7 +39,7 @@ func (ui *TextUI) ShowRoundResult(result scoring.RoundScore) {
 		for i, p := range players {
 			row[i] = result[p][cat]
 		}
-		labels = append(labels, categoryName(cat))
+		labels = append(labels, cat.String())
 		catRows = append(catRows, row)
 	}
 
@@ -95,7 +95,7 @@ func (ui *TextUI) ShowFinalResults(result scoring.SessionResult) {
 		for p := range states {
 			row[p] = sheets[p][cat]
 		}
-		catLabels = append(catLabels, categoryName(cat))
+		catLabels = append(catLabels, cat.String())
 		catRows = append(catRows, row)
 	}
 
@@ -273,17 +273,6 @@ func presentCategories(scores map[int]map[core.Category]int) []core.Category {
 	}
 	slices.Sort(rest)
 	return append(out, rest...)
-}
-
-// categoryName is the edition's name for the category, if it has one.
-func categoryName(cat core.Category) string {
-	if s := cat.String(); s != "" {
-		return s
-	}
-	if s, ok := core.DefaultCatStrings[cat]; ok {
-		return s
-	}
-	return fmt.Sprintf("Category %d", int(cat))
 }
 
 func sortedKeys[V any](m map[int]V) []int {

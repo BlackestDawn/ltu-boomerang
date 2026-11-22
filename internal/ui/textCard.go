@@ -10,21 +10,6 @@ import (
 	"github.com/BlackestDawn/ltu-boomerang/internal/core"
 )
 
-// Layout settings
-const (
-	cardInnerWidth = 15
-	cardGap        = "  "
-)
-
-// Formatting and colors
-const (
-	ansiReset  = "\033[0m"
-	ansiBold   = "\033[1m"
-	ansiGreen  = "\033[32m"
-	ansiYellow = "\033[33m"
-	ansiBlue   = "\033[34m"
-)
-
 // Symbol printing order and their coloration
 var symbolOrder = []core.Category{core.Collection, core.Animal, core.Activity}
 

@@ -14,11 +14,17 @@ type RevealCardEvent struct {
 	Card   Card `json:"card"`
 }
 
+type RevealDraftEvent struct {
+	Player int    `json:"player"`
+	Cards  []Card `json:"cards"`
+}
+
 type RoundScoreEvent map[int]map[Category]int
 
 type RoundBeginsEvent int
 
 func (RevealCardEvent) isEvent()  {}
+func (RevealDraftEvent) isEvent() {}
 func (RoundScoreEvent) isEvent()  {}
 func (RoundBeginsEvent) isEvent() {}
 
@@ -32,6 +38,8 @@ func MarshalEvent(ev Event) ([]byte, error) {
 	switch ev.(type) {
 	case RevealCardEvent:
 		t = "revealCard"
+	case RevealDraftEvent:
+		t = "revealDraft"
 	case RoundScoreEvent:
 		t = "roundScored"
 	case RoundBeginsEvent:
@@ -54,6 +62,9 @@ func UnmarshalEvent(b []byte) (Event, error) {
 	switch env.Type {
 	case "revealCard":
 		var e RevealCardEvent
+		return e, json.Unmarshal(env.Data, &e)
+	case "revealDraft":
+		var e RevealDraftEvent
 		return e, json.Unmarshal(env.Data, &e)
 	case "roundScored":
 		var e RoundScoreEvent

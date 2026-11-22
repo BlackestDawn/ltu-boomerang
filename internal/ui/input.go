@@ -4,8 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"slices"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/BlackestDawn/ltu-boomerang/internal/core"
 )
@@ -36,21 +38,31 @@ func (ui *TextUI) AskForCard(cards []core.Card, question string) int {
 	}) - 1
 }
 
-// AskForActivity shows the table with the draft and the given activity
-// options in the middle and asks the player to pick one or skip. counts[i] is
-// how many of options[i] the draft holds. It returns the index of the chosen
-// option, or -1 when skipping.
+// AskForActivity shows the table with the given activity options in the
+// middle and asks the player to pick one or skip. draft is the player's full
+// draft, shown at their edge of the table. counts[i] is how many of options[i]
+// the draft holds. It returns the index of the chosen option, or -1 when
+// skipping.
 func (ui *TextUI) AskForActivity(draft []core.Card, options []core.Symbol, counts []int) int {
-	grid := block(renderGrid(draft, 0, handColumns, "Your draft"))
+	// The draft is also revealed by a RevealDraftEvent, but that may not have
+	// been handled yet when this is called.
+	ui.mu.Lock()
+	ui.draftCards[localPlayer] = slices.Clone(draft)
+	ui.mu.Unlock()
+
+	nameWidth := 0
+	for _, o := range options {
+		nameWidth = max(nameWidth, utf8.RuneCountInString(o.Name))
+	}
 	list := block{rule("Activities", 30)}
 	for i, o := range options {
-		list = append(list, fmt.Sprintf("%s%d)%s %-16s ×%d", ansiBlue, i+1, ansiReset, o.Name, counts[i]))
+		list = append(list, fmt.Sprintf("%s%d)%s %s ×%d", ansiBlue, i+1, ansiReset, fit(o.Name, nameWidth), counts[i]))
 	}
 	list = append(list, fmt.Sprintf("%s0)%s skip", ansiBlue, ansiReset))
 	prompt := fmt.Sprintf("Score which activity (0-%d): ", len(options))
 
 	return ui.askInMiddle(0, len(options), func(msg string) block {
-		return vjoin(1, grid, list, block{msg}, block{prompt + cursorMark})
+		return vjoin(1, list, block{msg}, block{prompt + cursorMark})
 	}) - 1
 }
 

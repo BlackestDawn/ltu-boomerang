@@ -31,11 +31,11 @@ func (c *HumanController) forwardEvents() {
 }
 
 func (c *HumanController) ChooseThrow(hand []*core.Card) *core.Card {
-	return hand[c.ui.AskForCard(derefCards(hand), "Choose your throw card")]
+	return hand[c.ui.AskForCard(core.DerefCards(hand), "Choose your throw card")]
 }
 
 func (c *HumanController) ChooseDraft(hand []*core.Card) *core.Card {
-	return hand[c.ui.AskForCard(derefCards(hand), "Choose a card to draft")]
+	return hand[c.ui.AskForCard(core.DerefCards(hand), "Choose a card to draft")]
 }
 
 func (c *HumanController) ChooseActivity(hand []*core.Card, alreadyScored []*core.Symbol) *core.Symbol {
@@ -57,7 +57,7 @@ func (c *HumanController) ChooseActivity(hand []*core.Card, alreadyScored []*cor
 		shown[i] = *o
 		shownCounts[i] = counts[o]
 	}
-	choice := c.ui.AskForActivity(derefCards(hand), shown, shownCounts)
+	choice := c.ui.AskForActivity(core.DerefCards(hand), shown, shownCounts)
 	if choice < 0 {
 		return nil
 	}

@@ -51,7 +51,7 @@ func (g *Game) Play() scoring.SessionResult {
 		for i := range g.players {
 			wg.Go(func() {
 				g.playerStates[i].MoveCardToDraft(g.playerStates[i].Hand[0])
-				g.eventBus <- core.RevealCardEvent{Player: i, Card: *g.playerStates[i].Draft[len(g.playerStates[i].Draft)-1]}
+				g.eventBus <- core.RevealDraftEvent{Player: i, Cards: core.DerefCards(g.playerStates[i].Draft)}
 				g.playerStates[i].ChosenActivity = g.players[i].ChooseActivity(g.playerStates[i].Draft, g.playerStates[i].ScoredActivities)
 			})
 		}
