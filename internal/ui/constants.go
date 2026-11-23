@@ -11,7 +11,6 @@ const (
 
 // Table layout settings
 const (
-	localPlayer = 0 // the player sitting at the bottom edge of the table
 	sideColumns = 2 // card columns for players at the left/right edges
 	handColumns = 4 // card columns for the hand shown in the middle
 	tableGap    = 4 // spaces between the side drafts and the middle

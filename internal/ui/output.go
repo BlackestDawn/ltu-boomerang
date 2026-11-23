@@ -9,8 +9,8 @@ import (
 
 // seatOf places players around the table clockwise from the local player, so
 // passing to the next player hands cards to the left.
-func seatOf(player, numPlayers int) seat {
-	rel := (player - localPlayer + numPlayers) % numPlayers
+func seatOf(player, self, numPlayers int) seat {
+	rel := (player - self + numPlayers) % numPlayers
 	switch numPlayers {
 	case 2:
 		return []seat{seatBottom, seatTop}[rel]
@@ -22,8 +22,8 @@ func seatOf(player, numPlayers int) seat {
 }
 
 // playerName is how a player is referred to on screen.
-func playerName(p int) string {
-	if p == localPlayer {
+func playerName(p, self int) string {
+	if p == self {
 		return "You"
 	}
 	return fmt.Sprintf("Player %d", p+1)
@@ -98,11 +98,11 @@ func (ui *TextUI) renderTable(middle block) block {
 
 	edges := make(map[seat]block)
 	for p := range numPlayers {
-		header := playerName(p)
-		if p == localPlayer {
+		header := playerName(p, ui.self)
+		if p == ui.self {
 			header = "Your draft"
 		}
-		s := seatOf(p, numPlayers)
+		s := seatOf(p, ui.self, numPlayers)
 		switch s {
 		case seatTop, seatBottom:
 			edges[s] = renderGrid(ui.draftCards[p], -1, 0, header)

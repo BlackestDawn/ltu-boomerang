@@ -10,15 +10,12 @@ import (
 
 type Config struct {
 	ConnectTo   *string
+	Listen      *string
 	Edition     *string
 	PassingDir  *string
 	PlayerCount *int
 	BotCount    *int
 	Rounds      *int
-}
-
-func (c *Config) cleanup() {
-	// TODO: cleanup stuff like networking
 }
 
 func buildConfig(args []string) (*Config, error) {
@@ -67,6 +64,14 @@ func buildConfig(args []string) (*Config, error) {
 			Help: "Connect to a remote session. If specified no other option will have any effect",
 		},
 	)
+	listen := parser.String(
+		"l",
+		"listen",
+		&argparse.Options{
+			Help:    "Address to listen for remote players on, used when there are more players than 1",
+			Default: core.ListenPort,
+		},
+	)
 	numRounds := parser.Int(
 		"r",
 		"rounds",
@@ -84,6 +89,7 @@ func buildConfig(args []string) (*Config, error) {
 
 	return &Config{
 		ConnectTo:   connectTo,
+		Listen:      listen,
 		Edition:     edition,
 		PassingDir:  passing,
 		PlayerCount: players,

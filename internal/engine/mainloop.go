@@ -21,7 +21,7 @@ func (g *Game) Play() scoring.SessionResult {
 			g.playerStates[i].Draft = g.playerStates[i].Draft[:0]
 			g.playerStates[i].ChosenActivity = nil
 		}
-		g.eventBus <- core.RoundBeginsEvent(round)
+		g.events.Publish(core.RoundBeginsEvent(round))
 
 		// Choose the throw card
 		for i := range g.players {
@@ -39,7 +39,7 @@ func (g *Game) Play() scoring.SessionResult {
 				wg.Go(func() {
 					card := g.players[i].ChooseDraft(g.playerStates[i].Hand)
 					g.playerStates[i].MoveCardToDraft(card)
-					g.eventBus <- core.RevealCardEvent{Player: i, Card: *card}
+					g.events.Publish(core.RevealCardEvent{Player: i, Card: *card})
 				})
 			}
 			wg.Wait()
@@ -51,13 +51,13 @@ func (g *Game) Play() scoring.SessionResult {
 		for i := range g.players {
 			wg.Go(func() {
 				g.playerStates[i].MoveCardToDraft(g.playerStates[i].Hand[0])
-				g.eventBus <- core.RevealDraftEvent{Player: i, Cards: core.DerefCards(g.playerStates[i].Draft)}
+				g.events.Publish(core.RevealDraftEvent{Player: i, Cards: core.DerefSlice(g.playerStates[i].Draft)})
 				g.playerStates[i].ChosenActivity = g.players[i].ChooseActivity(g.playerStates[i].Draft, g.playerStates[i].ScoredActivities)
 			})
 		}
 		wg.Wait()
 		roundScore := scoring.ScoreRound(round, g.playerStates, g.edition.Rules())
-		g.eventBus <- core.RoundScoreEvent(roundScore)
+		g.events.Publish(core.RoundScoreEvent(roundScore))
 
 		g.UpdateEndOfRound()
 	}

@@ -15,6 +15,7 @@ type TextUI struct {
 	mu         sync.Mutex // guards the fields below
 	draftCards map[int][]core.Card
 	numPlayers int
+	self       int         // seat of the local player, drawn at the bottom edge
 	round      int         // current round, 0-based
 	totals     map[int]int // running score per player
 	pending    block       // round result screen not yet shown to the player

@@ -15,3 +15,5 @@ var DefaultCatStrings = map[Category]string{
 	Animal:      "Animals",
 	Activity:    "Activities",
 }
+
+const ListenPort = "7777"

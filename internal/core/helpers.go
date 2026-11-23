@@ -13,11 +13,11 @@ func SliceIsSubset[S ~[]E, E comparable](subset S, superset S) bool {
 	return len(checkset) == 0
 }
 
-// DerefCards copies the cards pointed to into a slice of values.
-func DerefCards(cards []*Card) []Card {
-	out := make([]Card, len(cards))
-	for i, c := range cards {
-		out[i] = *c
+// DerefSlice copies the values pointed to into a slice of values.
+func DerefSlice[E any](list []*E) []E {
+	out := make([]E, len(list))
+	for i, v := range list {
+		out[i] = *v
 	}
 	return out
 }

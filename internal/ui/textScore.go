@@ -29,7 +29,7 @@ func (ui *TextUI) ShowRoundResult(result scoring.RoundScore) {
 	players := sortedKeys(result)
 	header := []string{fmt.Sprintf("Round %d", ui.round+1)}
 	for _, p := range players {
-		header = append(header, playerName(p))
+		header = append(header, playerName(p, ui.self))
 	}
 
 	var catRows [][]int
@@ -74,7 +74,7 @@ func (ui *TextUI) ShowFinalResults(result scoring.SessionResult) {
 	header := []string{"Final score"}
 	totals := make([]int, len(states))
 	for p, s := range states {
-		header = append(header, playerName(p))
+		header = append(header, playerName(p, ui.self))
 		totals[p] = s.ScoreSheet.Total()
 	}
 
@@ -131,7 +131,7 @@ func (ui *TextUI) ShowFinalResults(result scoring.SessionResult) {
 		block(strings.Split(banner, "\n")),
 		block{rule("Final results", 40)},
 		hjoin(tableGap, byCategory, byRound),
-		renderRanking(totals, result.Winner),
+		renderRanking(totals, result.Winner, ui.self),
 	)
 	ui.printLines(screen)
 	fmt.Fprintln(ui.out)
@@ -139,7 +139,7 @@ func (ui *TextUI) ShowFinalResults(result scoring.SessionResult) {
 
 // renderRanking lists players from highest to lowest score, ties sharing a
 // place, with the tie-broken winner first among equals.
-func renderRanking(totals []int, winner int) block {
+func renderRanking(totals []int, winner, self int) block {
 	order := make([]int, len(totals))
 	for i := range order {
 		order[i] = i
@@ -157,7 +157,7 @@ func renderRanking(totals []int, winner int) block {
 		if i == 0 || totals[p] != totals[order[i-1]] {
 			place = i + 1
 		}
-		line := fmt.Sprintf("%d. %-10s %4d points", place, playerName(p), totals[p])
+		line := fmt.Sprintf("%d. %-10s %4d points", place, playerName(p, self), totals[p])
 		if p == winner {
 			line = ansiBold + ansiGreen + line + "  ★ winner" + ansiReset
 		}
@@ -165,7 +165,7 @@ func renderRanking(totals []int, winner int) block {
 	}
 
 	verdict := fmt.Sprintf("Player %d wins the game!", winner+1)
-	if winner == localPlayer {
+	if winner == self {
 		verdict = "You win the game!"
 	}
 	return append(lines, "", ansiBold+verdict+ansiReset)

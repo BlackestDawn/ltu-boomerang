@@ -3,24 +3,39 @@ package core
 import "context"
 
 // subscriberBuffer is how many events a subscriber can fall behind before the
-// server (and therefore the event source) blocks.
+// server (and therefore the publisher) blocks.
 const subscriberBuffer = 32
 
+// Publisher is the sending side of the event server.
+type Publisher interface {
+	// Publish returns once ev is queued on every subscriber channel. Events
+	// are queued in the order they are published, so anything a goroutine
+	// does after Publish returns happens after the event is in every queue.
+	Publish(ev Event)
+}
+
 type EventServer interface {
+	Publisher
 	Subscribe() <-chan Event
 	CancelSubscription(<-chan Event)
 }
 
+type publishRequest struct {
+	ev   Event
+	done chan struct{}
+}
+
 type eventServer struct {
 	ctx            context.Context
-	source         <-chan Event
+	publish        chan publishRequest
 	listeners      []chan Event
 	addListener    chan chan Event
 	removeListener chan (<-chan Event)
 }
 
-// Subscribe returns a channel receiving every event from the source. The
-// channel is closed when the server stops (context cancelled or source closed).
+// Subscribe returns a channel receiving every event published from now on.
+// The channel is closed when the server stops (context cancelled) or the
+// subscription is cancelled.
 func (e *eventServer) Subscribe() <-chan Event {
 	newListener := make(chan Event, subscriberBuffer)
 	select {
@@ -38,10 +53,24 @@ func (e *eventServer) CancelSubscription(channel <-chan Event) {
 	}
 }
 
-func NewEventServer(ctx context.Context, source <-chan Event) EventServer {
+func (e *eventServer) Publish(ev Event) {
+	req := publishRequest{ev: ev, done: make(chan struct{})}
+	select {
+	case e.publish <- req:
+	case <-e.ctx.Done():
+		return
+	}
+	select {
+	case <-req.done:
+	case <-e.ctx.Done():
+	}
+}
+
+// NewEventServer starts a server that runs until ctx is cancelled.
+func NewEventServer(ctx context.Context) EventServer {
 	service := &eventServer{
 		ctx:            ctx,
-		source:         source,
+		publish:        make(chan publishRequest),
 		listeners:      make([]chan Event, 0, 16),
 		addListener:    make(chan chan Event),
 		removeListener: make(chan (<-chan Event)),
@@ -65,17 +94,15 @@ func (e *eventServer) serve() {
 			e.listeners = append(e.listeners, newListener)
 		case listenerToRemove := <-e.removeListener:
 			e.remove(listenerToRemove)
-		case val, ok := <-e.source:
-			if !ok {
-				return
-			}
+		case req := <-e.publish:
 			for _, listener := range e.listeners {
 				select {
-				case listener <- val:
+				case listener <- req.ev:
 				case <-e.ctx.Done():
 					return
 				}
 			}
+			close(req.done)
 		}
 	}
 }

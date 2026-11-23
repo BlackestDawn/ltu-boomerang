@@ -47,7 +47,7 @@ func (ui *TextUI) AskForActivity(draft []core.Card, options []core.Symbol, count
 	// The draft is also revealed by a RevealDraftEvent, but that may not have
 	// been handled yet when this is called.
 	ui.mu.Lock()
-	ui.draftCards[localPlayer] = slices.Clone(draft)
+	ui.draftCards[ui.self] = slices.Clone(draft)
 	ui.mu.Unlock()
 
 	nameWidth := 0

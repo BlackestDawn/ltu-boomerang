@@ -12,13 +12,13 @@ type Game struct {
 	playerStates []*core.PlayerState
 	deck         *core.Deck
 	edition      edition.Edition
-	eventBus     chan core.Event
+	events       core.Publisher
 	rng          *rand.Rand
 	passing      core.PassingStrategy
 	numRounds    int
 }
 
-func NewGame(ed edition.Edition, players []PlayerController, rng *rand.Rand, passingDir string, rounds int, ev chan core.Event) *Game {
+func NewGame(ed edition.Edition, players []PlayerController, rng *rand.Rand, passingDir string, rounds int, events core.Publisher) *Game {
 	var states []*core.PlayerState
 	for range players {
 		states = append(states, core.NewPlayerState())
@@ -27,7 +27,7 @@ func NewGame(ed edition.Edition, players []PlayerController, rng *rand.Rand, pas
 		players:      players,
 		playerStates: states,
 		edition:      ed,
-		eventBus:     ev,
+		events:       events,
 		rng:          rng,
 		passing:      core.NewPassingStrategy(passingDir),
 		numRounds:    rounds,
