@@ -14,6 +14,7 @@ import (
 var scoreOrder = []core.Category{
 	core.ThrowCatch, core.Site, core.RegionBonus,
 	core.Collection, core.Animal, core.Activity,
+	core.TravelBonus,
 }
 
 // ShowRoundResult prepares a screen with the round's scores in the middle of

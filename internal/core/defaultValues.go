@@ -14,6 +14,7 @@ var DefaultCatStrings = map[Category]string{
 	Collection:  "Collections",
 	Animal:      "Animals",
 	Activity:    "Activities",
+	TravelBonus: "Travel Bonus",
 }
 
 const ListenPort = "7777"

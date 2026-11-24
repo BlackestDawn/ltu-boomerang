@@ -9,9 +9,10 @@ const (
 	ThrowCatch Category = iota
 	Site
 	RegionBonus
-	Collection // Scoring by total sum, green symbol
-	Animal     // Scoring for each pair, yellow symbol
-	Activity   // Optional scoring once per icon, blue symbol
+	Collection  // Scoring by total sum, green symbol
+	Animal      // Scoring for each pair, yellow symbol
+	Activity    // Optional scoring once per icon, blue symbol
+	TravelBonus // Ranked one-off bonus (USA coast to coast, Europe passport)
 )
 
 var CatStrings map[Category]string
