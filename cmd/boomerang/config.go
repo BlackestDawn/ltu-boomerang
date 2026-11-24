@@ -9,13 +9,13 @@ import (
 )
 
 type Config struct {
-	ConnectTo   *string
-	Listen      *string
-	Edition     *string
-	PassingDir  *string
-	PlayerCount *int
-	BotCount    *int
-	Rounds      *int
+	ConnectTo   string
+	Listen      string
+	Edition     string
+	PassingDir  string
+	PlayerCount int
+	BotCount    int
+	Rounds      int
 }
 
 func buildConfig(args []string) (*Config, error) {
@@ -50,7 +50,7 @@ func buildConfig(args []string) (*Config, error) {
 		&argparse.Options{
 			Help:     fmt.Sprintf("Number of human players including you, %d-%d. Everyone except you joins with --connect", core.MinPlayerCount, core.MaxPlayerCount),
 			Default:  2,
-			Validate: func(args []string) error { return validateCount(args[0], core.MaxPlayerCount, core.MinPlayerCount) },
+			Validate: func(args []string) error { return validateCount(args[0], core.MinPlayerCount, core.MaxPlayerCount) },
 		},
 	)
 	bots := parser.Int(
@@ -59,7 +59,7 @@ func buildConfig(args []string) (*Config, error) {
 		&argparse.Options{
 			Help:     fmt.Sprintf("Number of bots to fill empty seats, up to %d. At least 1 is needed when playing alone", core.MaxPlayerCount-1),
 			Default:  0,
-			Validate: func(args []string) error { return validateCount(args[0], core.MaxPlayerCount-*players, 0) },
+			Validate: func(args []string) error { return validateCount(args[0], 0, core.MaxPlayerCount-*players) },
 		},
 	)
 	connectTo := parser.String(
@@ -83,7 +83,7 @@ func buildConfig(args []string) (*Config, error) {
 		&argparse.Options{
 			Help:     fmt.Sprintf("Number of rounds to play, %d-%d. The standard rules use %d", core.MinRounds, core.MaxRounds, core.MinRounds),
 			Default:  core.MinRounds,
-			Validate: func(args []string) error { return validateCount(args[0], core.MaxRounds, core.MinRounds) },
+			Validate: func(args []string) error { return validateCount(args[0], core.MinRounds, core.MaxRounds) },
 		},
 	)
 
@@ -93,28 +93,28 @@ func buildConfig(args []string) (*Config, error) {
 	}
 
 	if *players+*bots < 2 {
-		return nil, fmt.Errorf("%s", parser.Usage("Total between players and bots must be at least 2\n"))
+		return nil, fmt.Errorf("%s", parser.Usage("total between players and bots must be at least 2\n"))
 	}
 
 	return &Config{
-		ConnectTo:   connectTo,
-		Listen:      listen,
-		Edition:     edition,
-		PassingDir:  passing,
-		PlayerCount: players,
-		BotCount:    bots,
-		Rounds:      numRounds,
+		ConnectTo:   *connectTo,
+		Listen:      *listen,
+		Edition:     *edition,
+		PassingDir:  *passing,
+		PlayerCount: *players,
+		BotCount:    *bots,
+		Rounds:      *numRounds,
 	}, nil
 }
 
-func validateCount(input string, max int, min int) error {
+func validateCount(input string, min, max int) error {
 	count, err := strconv.Atoi(input)
 	if err != nil {
 		return err
 	}
 
 	if count < min || count > max {
-		return fmt.Errorf("Invalid value: %d", count)
+		return fmt.Errorf("invalid value: %d", count)
 	}
 
 	return nil

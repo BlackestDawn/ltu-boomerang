@@ -19,12 +19,12 @@ const helloTimeout = 10 * time.Second
 // the order they connect, then the bots. The remote controllers are also
 // returned on their own so they can be finished after the game.
 func buildControllers(cfg *Config, ui *ui.TextUI, rng *rand.Rand, es core.EventServer) ([]engine.PlayerController, []*agent.RemoteController, error) {
-	numRemote := *cfg.PlayerCount - 1
-	numPlayers := *cfg.PlayerCount + *cfg.BotCount
+	numRemote := cfg.PlayerCount - 1
+	numPlayers := cfg.PlayerCount + cfg.BotCount
 
 	participants := []engine.PlayerController{agent.NewHumanController(ui, es.Subscribe())}
 
-	remotes, err := acceptRemotes(":"+*cfg.Listen, numRemote, numPlayers, *cfg.Rounds, *cfg.Edition, rng, es)
+	remotes, err := acceptRemotes(":"+cfg.Listen, numRemote, numPlayers, cfg.Rounds, cfg.Edition, rng, es)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -32,7 +32,7 @@ func buildControllers(cfg *Config, ui *ui.TextUI, rng *rand.Rand, es core.EventS
 		participants = append(participants, r)
 	}
 
-	for i := 0; i < *cfg.BotCount; i++ {
+	for i := 0; i < cfg.BotCount; i++ {
 		participants = append(participants, agent.NewBotController(rng))
 	}
 	return participants, remotes, nil

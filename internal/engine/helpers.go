@@ -6,7 +6,7 @@ import (
 	"github.com/BlackestDawn/ltu-boomerang/internal/core"
 )
 
-func (g *Game) PassHands(round int, catch bool) {
+func (g *Game) passHands(round int, catch bool) {
 	targets := make([][]*core.Card, len(g.playerStates))
 	for i := range g.players {
 		var to int
@@ -22,7 +22,7 @@ func (g *Game) PassHands(round int, catch bool) {
 	}
 }
 
-func (g *Game) UpdateEndOfRound() {
+func (g *Game) updateEndOfRound() {
 	for _, state := range g.playerStates {
 		for _, card := range state.Draft {
 			if !slices.Contains(state.VisitedSites, card.Site) {

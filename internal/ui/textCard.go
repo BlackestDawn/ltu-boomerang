@@ -2,7 +2,6 @@ package ui
 
 import (
 	"fmt"
-	"io"
 	"math"
 	"strings"
 	"unicode/utf8"
@@ -49,13 +48,6 @@ func renderCard(c core.Card) []string {
 	lines = append(lines, cardLine(spread(siteLabel(c.Site), fmt.Sprint(c.Value)), ansiBold))
 	lines = append(lines, "╰"+border+"╯")
 	return lines
-}
-
-// printCardsGrid prints the cards as a grid, see renderGrid for the layout rules.
-func printCardsGrid(w io.Writer, cards []core.Card, rows, cols int, header string) {
-	for _, line := range renderGrid(cards, rows, cols, header) {
-		fmt.Fprintln(w, line)
-	}
 }
 
 // renderGrid lays the cards out in a grid and returns it as lines of equal

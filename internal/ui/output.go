@@ -3,8 +3,6 @@ package ui
 import (
 	"fmt"
 	"strings"
-
-	"github.com/BlackestDawn/ltu-boomerang/internal/core"
 )
 
 // seatOf places players around the table clockwise from the local player, so
@@ -27,23 +25,6 @@ func playerName(p, self int) string {
 		return "You"
 	}
 	return fmt.Sprintf("Player %d", p+1)
-}
-
-// PrintTable clears the screen and prints the banner and the table with
-// every player's draft along its edges and nothing in the middle.
-func (ui *TextUI) PrintTable() {
-	ui.printScreen(nil)
-}
-
-// PrintHand prints the cards in a grid.
-func (ui *TextUI) PrintHand(cards []core.Card) {
-	fmt.Fprintln(ui.out)
-	if len(cards) > 0 {
-		printCardsGrid(ui.out, cards, 0, handColumns, "Your hand")
-	} else {
-		fmt.Fprintln(ui.out, "    No cards in hand")
-	}
-	fmt.Fprintln(ui.out)
 }
 
 // printScreen clears the screen and prints the banner and the table with

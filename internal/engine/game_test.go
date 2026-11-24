@@ -299,7 +299,7 @@ func TestUpdateEndOfRound(t *testing.T) {
 	state.ChosenActivity = swim
 	g := &Game{playerStates: []*core.PlayerState{state}}
 
-	g.UpdateEndOfRound()
+	g.updateEndOfRound()
 
 	if !slices.Equal(state.VisitedSites, []byte{cards[0].Site, cards[1].Site, cards[2].Site}) {
 		t.Errorf("visited sites %q, want each site once", state.VisitedSites)

@@ -36,7 +36,7 @@ func (g *Game) Play() scoring.SessionResult {
 		// player has chosen, so nobody sees another player's pick in advance.
 		picks := make([]*core.Card, len(g.players))
 		for len(g.playerStates[0].Hand) > 1 {
-			g.PassHands(round, false)
+			g.passHands(round, false)
 			for i := range g.players {
 				wg.Go(func() {
 					picks[i] = g.players[i].ChooseDraft(g.playerStates[i].Hand)
@@ -51,7 +51,7 @@ func (g *Game) Play() scoring.SessionResult {
 
 		// One card left, pass it around and automatically add to draft as catch card
 		// Then calculate the round's scores
-		g.PassHands(round, true)
+		g.passHands(round, true)
 		for i := range g.players {
 			wg.Go(func() {
 				g.playerStates[i].MoveCardToDraft(g.playerStates[i].Hand[0])
@@ -63,7 +63,7 @@ func (g *Game) Play() scoring.SessionResult {
 		roundScore := scoring.ScoreRound(round, g.playerStates, g.edition.Rules())
 		g.events.Publish(core.RoundScoreEvent(roundScore))
 
-		g.UpdateEndOfRound()
+		g.updateEndOfRound()
 	}
 
 	return scoring.ScoreFinal(g.playerStates, g.edition.GetWinner)

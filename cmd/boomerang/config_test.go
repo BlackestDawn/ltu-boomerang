@@ -38,11 +38,11 @@ func TestPlayerCountLimits(t *testing.T) {
 		if !c.ok {
 			if err == nil {
 				t.Errorf("%q accepted with %d players and %d bots, want error",
-					c.args, *cfg.PlayerCount, *cfg.BotCount)
+					c.args, cfg.PlayerCount, cfg.BotCount)
 			}
 			continue
 		}
-		if total := *cfg.PlayerCount + *cfg.BotCount; total < 2 || total > core.MaxPlayerCount {
+		if total := cfg.PlayerCount + cfg.BotCount; total < 2 || total > core.MaxPlayerCount {
 			t.Errorf("%q gives %d players in total", c.args, total)
 		}
 	}
@@ -54,11 +54,11 @@ func TestDefaultsToFourRounds(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if *cfg.Rounds != 4 {
-		t.Errorf("default rounds %d, want 4", *cfg.Rounds)
+	if cfg.Rounds != 4 {
+		t.Errorf("default rounds %d, want 4", cfg.Rounds)
 	}
-	if *cfg.Edition != "AU" || *cfg.PassingDir != "left" {
-		t.Errorf("defaults: edition %q passing %q, want AU/left", *cfg.Edition, *cfg.PassingDir)
+	if cfg.Edition != "AU" || cfg.PassingDir != "left" {
+		t.Errorf("defaults: edition %q passing %q, want AU/left", cfg.Edition, cfg.PassingDir)
 	}
 }
 

@@ -12,17 +12,6 @@ import (
 	"github.com/BlackestDawn/ltu-boomerang/internal/core"
 )
 
-func (ui *TextUI) AskForNumber(max, min int) int {
-	for {
-		fmt.Fprintf(ui.out, "Choose a number between %d and %d: ", min, max)
-		choice, err := ui.readNumber(min, max)
-		if err == nil || errors.Is(err, io.EOF) {
-			return choice
-		}
-		fmt.Fprintln(ui.out, err)
-	}
-}
-
 // AskForCard shows the table with the cards in the middle and asks the player
 // to pick one of them. It returns the index of the chosen card.
 func (ui *TextUI) AskForCard(cards []core.Card, question string) int {
