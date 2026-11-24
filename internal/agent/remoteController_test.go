@@ -153,8 +153,8 @@ func TestRemoteFinishSendsQueuedEventsThenFinal(t *testing.T) {
 
 	sheet := &core.ScoreSheet{CategoryScores: map[core.Category][]int{core.Site: {5}}}
 	go c.Finish(scoring.SessionResult{
-		Ranking: []*core.PlayerState{{ScoreSheet: sheet}},
-		Winner:  0,
+		Scores: []*core.ScoreSheet{sheet},
+		Winner: 0,
 	})
 
 	var final net.FinalData

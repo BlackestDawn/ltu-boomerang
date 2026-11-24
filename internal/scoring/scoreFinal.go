@@ -1,18 +1,16 @@
 package scoring
 
-import (
-	"slices"
+import "github.com/BlackestDawn/ltu-boomerang/internal/core"
 
-	"github.com/BlackestDawn/ltu-boomerang/internal/core"
-)
-
-func ScoreFinal(all []*core.PlayerState, tieBreaker func(all []*core.PlayerState, score int) int) SessionResult {
-	var totals []int
-	for _, state := range all {
-		totals = append(totals, state.ScoreSheet.Total())
+// ScoreFinal collects the players' score sheets in seat order and lets the
+// edition's GetWinner pick the winner among them.
+func ScoreFinal(all []*core.PlayerState, getWinner func(sheets []*core.ScoreSheet) int) SessionResult {
+	scores := make([]*core.ScoreSheet, len(all))
+	for i, state := range all {
+		scores[i] = state.ScoreSheet
 	}
 	return SessionResult{
-		Ranking: all,
-		Winner:  tieBreaker(all, slices.Max(totals)),
+		Scores: scores,
+		Winner: getWinner(scores),
 	}
 }

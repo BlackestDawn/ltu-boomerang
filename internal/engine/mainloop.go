@@ -62,5 +62,5 @@ func (g *Game) Play() scoring.SessionResult {
 		g.UpdateEndOfRound()
 	}
 
-	return scoring.ScoreFinal(g.playerStates, g.edition.TieBreaker)
+	return scoring.ScoreFinal(g.playerStates, g.edition.GetWinner)
 }

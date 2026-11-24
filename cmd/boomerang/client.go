@@ -128,11 +128,11 @@ func (c *client) answer(choice int) error {
 // finalResult rebuilds the session result the UI expects. Only the score
 // sheets are sent, which is all the results screen uses.
 func finalResult(f net.FinalData) scoring.SessionResult {
-	states := make([]*core.PlayerState, len(f.ScoreSheets))
+	scores := make([]*core.ScoreSheet, len(f.ScoreSheets))
 	for i := range f.ScoreSheets {
-		states[i] = &core.PlayerState{ScoreSheet: &f.ScoreSheets[i]}
+		scores[i] = &f.ScoreSheets[i]
 	}
-	return scoring.SessionResult{Ranking: states, Winner: f.Winner}
+	return scoring.SessionResult{Scores: scores, Winner: f.Winner}
 }
 
 func hostError(msg net.Message) error {

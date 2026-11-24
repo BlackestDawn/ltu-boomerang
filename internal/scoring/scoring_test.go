@@ -48,31 +48,26 @@ func TestScoreRoundAppliesAllRules(t *testing.T) {
 	}
 }
 
-// Requirement 12: the winner is the player with the highest total.
-func TestScoreFinalPicksHighestTotal(t *testing.T) {
+// Requirement 12: the score sheets are handed to the winner function in seat
+// order and its choice is the winner.
+func TestScoreFinalUsesGetWinner(t *testing.T) {
 	states := newStates(3)
-	states[0].ScoreSheet.Add(0, core.Site, 10)
-	states[1].ScoreSheet.Add(0, core.Site, 30)
-	states[2].ScoreSheet.Add(0, core.Site, 20)
 
-	var gotTop int
-	tieBreaker := func(all []*core.PlayerState, top int) int {
-		gotTop = top
-		for i, s := range all {
-			if s.ScoreSheet.Total() == top {
-				return i
-			}
+	var got []*core.ScoreSheet
+	getWinner := func(sheets []*core.ScoreSheet) int {
+		got = sheets
+		return 2
+	}
+	res := ScoreFinal(states, getWinner)
+	if res.Winner != 2 {
+		t.Errorf("winner %d, want 2", res.Winner)
+	}
+	if len(got) != 3 || len(res.Scores) != 3 {
+		t.Fatalf("getWinner got %d sheets, result has %d, want 3", len(got), len(res.Scores))
+	}
+	for i, s := range states {
+		if got[i] != s.ScoreSheet || res.Scores[i] != s.ScoreSheet {
+			t.Errorf("sheet %d is not player %d's", i, i)
 		}
-		return -1
-	}
-	res := ScoreFinal(states, tieBreaker)
-	if gotTop != 30 {
-		t.Errorf("tie breaker got top score %d, want 30", gotTop)
-	}
-	if res.Winner != 1 {
-		t.Errorf("winner %d, want 1", res.Winner)
-	}
-	if len(res.Ranking) != 3 {
-		t.Errorf("ranking has %d players, want 3", len(res.Ranking))
 	}
 }

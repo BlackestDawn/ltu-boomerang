@@ -159,17 +159,17 @@ func TestScoreCoastToCoast(t *testing.T) {
 	}
 }
 
-func TestTieBreaker(t *testing.T) {
-	sheet := func(c2c, throw, other int) *core.PlayerState {
-		return &core.PlayerState{ScoreSheet: &core.ScoreSheet{CategoryScores: map[core.Category][]int{
+func TestGetWinner(t *testing.T) {
+	sheet := func(c2c, throw, other int) *core.ScoreSheet {
+		return &core.ScoreSheet{CategoryScores: map[core.Category][]int{
 			core.TravelBonus: {c2c}, core.ThrowCatch: {throw}, core.Site: {other},
-		}}}
+		}}
 	}
 	ed := New()
-	if got := ed.TieBreaker([]*core.PlayerState{sheet(0, 10, 10), sheet(3, 0, 17)}, 20); got != 1 {
+	if got := ed.GetWinner([]*core.ScoreSheet{sheet(0, 10, 10), sheet(3, 0, 17)}); got != 1 {
 		t.Errorf("coast to coast first: winner %d, want 1", got)
 	}
-	if got := ed.TieBreaker([]*core.PlayerState{sheet(3, 1, 16), sheet(3, 5, 12)}, 20); got != 1 {
+	if got := ed.GetWinner([]*core.ScoreSheet{sheet(3, 1, 16), sheet(3, 5, 12)}); got != 1 {
 		t.Errorf("then throw & catch: winner %d, want 1", got)
 	}
 }

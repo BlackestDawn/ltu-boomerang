@@ -21,8 +21,8 @@ func (e *EuropeEditionData) Rules() map[core.Category]core.ScoringRule {
 }
 
 // Ties are broken by the passport bonus, then by throw & catch score.
-func (e *EuropeEditionData) TieBreaker(all []*core.PlayerState, score int) int {
-	return shared.TieBreak(all, score, core.TravelBonus, core.ThrowCatch)
+func (e *EuropeEditionData) GetWinner(sheets []*core.ScoreSheet) int {
+	return shared.GetWinner(sheets, core.TravelBonus, core.ThrowCatch)
 }
 
 func New() *EuropeEditionData {

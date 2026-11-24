@@ -368,13 +368,13 @@ func TestPlayReportsWinner(t *testing.T) {
 		g := NewGame(australia.New(), recs, rand.New(rand.NewSource(seed)), "left", core.MinRounds, &eventLog{})
 		res := g.Play()
 
-		w := res.Ranking[res.Winner].ScoreSheet
-		for p, s := range res.Ranking {
-			if s.ScoreSheet.Total() > w.Total() {
-				t.Errorf("seed %d: player %d has %d, more than winner's %d", seed, p, s.ScoreSheet.Total(), w.Total())
+		w := res.Scores[res.Winner]
+		for p, s := range res.Scores {
+			if s.Total() > w.Total() {
+				t.Errorf("seed %d: player %d has %d, more than winner's %d", seed, p, s.Total(), w.Total())
 			}
-			if s.ScoreSheet.Total() == w.Total() &&
-				s.ScoreSheet.CategoryTotal(core.ThrowCatch) > w.CategoryTotal(core.ThrowCatch) {
+			if s.Total() == w.Total() &&
+				s.CategoryTotal(core.ThrowCatch) > w.CategoryTotal(core.ThrowCatch) {
 				t.Errorf("seed %d: tie lost by player %d with more Throw & Catch", seed, p)
 			}
 		}

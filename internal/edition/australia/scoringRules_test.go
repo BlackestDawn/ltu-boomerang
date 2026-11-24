@@ -216,29 +216,29 @@ func TestRulesCoverAllCategories(t *testing.T) {
 	}
 }
 
-func sheet(throwCatch, other int) *core.PlayerState {
-	return &core.PlayerState{ScoreSheet: &core.ScoreSheet{CategoryScores: map[core.Category][]int{
+func sheet(throwCatch, other int) *core.ScoreSheet {
+	return &core.ScoreSheet{CategoryScores: map[core.Category][]int{
 		core.ThrowCatch: {throwCatch},
 		core.Site:       {other},
-	}}}
+	}}
 }
 
 // Requirement 12: highest total wins; 12a: ties broken by Throw & Catch.
-func TestTieBreaker(t *testing.T) {
+func TestGetWinner(t *testing.T) {
 	ed := New()
 	cases := []struct {
-		name string
-		all  []*core.PlayerState
-		top  int
-		want int
+		name   string
+		sheets []*core.ScoreSheet
+		want   int
 	}{
-		{"clear winner", []*core.PlayerState{sheet(1, 10), sheet(2, 20), sheet(0, 5)}, 22, 1},
-		{"tie, more throw&catch wins", []*core.PlayerState{sheet(2, 18), sheet(9, 11), sheet(1, 3)}, 20, 1},
-		{"tie, first beats lower", []*core.PlayerState{sheet(8, 12), sheet(3, 17)}, 20, 0},
-		{"non-tied higher T&C ignored", []*core.PlayerState{sheet(15, 0), sheet(1, 19), sheet(2, 18)}, 20, 2},
+		{"clear winner", []*core.ScoreSheet{sheet(1, 10), sheet(2, 20), sheet(0, 5)}, 1},
+		{"tie, more throw&catch wins", []*core.ScoreSheet{sheet(2, 18), sheet(9, 11), sheet(1, 3)}, 1},
+		{"tie, first beats lower", []*core.ScoreSheet{sheet(8, 12), sheet(3, 17)}, 0},
+		{"non-tied higher T&C ignored", []*core.ScoreSheet{sheet(15, 0), sheet(1, 19), sheet(2, 18)}, 2},
+		{"full tie, lowest seat wins", []*core.ScoreSheet{sheet(2, 8), sheet(2, 8)}, 0},
 	}
 	for _, c := range cases {
-		if got := ed.TieBreaker(c.all, c.top); got != c.want {
+		if got := ed.GetWinner(c.sheets); got != c.want {
 			t.Errorf("%s: winner %d, want %d", c.name, got, c.want)
 		}
 	}

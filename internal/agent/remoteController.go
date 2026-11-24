@@ -102,8 +102,8 @@ func (c *RemoteController) Finish(result scoring.SessionResult) {
 
 	if !c.isLost() {
 		final := net.FinalData{Winner: result.Winner}
-		for _, s := range result.Ranking {
-			final.ScoreSheets = append(final.ScoreSheets, *s.ScoreSheet)
+		for _, s := range result.Scores {
+			final.ScoreSheets = append(final.ScoreSheets, *s)
 		}
 		if msg, err := net.NewMessage(net.Final, final); err == nil {
 			c.net.Send(msg)

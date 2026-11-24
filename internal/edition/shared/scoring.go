@@ -141,25 +141,26 @@ func RankedBonus(p int, all []*core.PlayerState, cat core.Category, reached func
 	}
 }
 
-// TieBreak returns the player with the given top score, choosing among tied
-// players by the highest total in each of cats in turn. If still tied, the
-// lowest seat wins.
-func TieBreak(all []*core.PlayerState, score int, cats ...core.Category) int {
+// GetWinner returns the seat with the highest total score. Ties are decided by
+// the highest total in each of cats in turn; if still tied, the lowest seat
+// wins. It returns -1 for no score sheets.
+func GetWinner(sheets []*core.ScoreSheet, cats ...core.Category) int {
 	best := -1
-	for id, player := range all {
-		if player.ScoreSheet.Total() != score {
-			continue
-		}
-		if best < 0 || better(player, all[best], cats) {
+	for id, sheet := range sheets {
+		if best < 0 || better(sheet, sheets[best], cats) {
 			best = id
 		}
 	}
 	return best
 }
 
-func better(a, b *core.PlayerState, cats []core.Category) bool {
+// better reports whether a beats b on total score, then on cats in turn.
+func better(a, b *core.ScoreSheet, cats []core.Category) bool {
+	if ta, tb := a.Total(), b.Total(); ta != tb {
+		return ta > tb
+	}
 	for _, cat := range cats {
-		ta, tb := a.ScoreSheet.CategoryTotal(cat), b.ScoreSheet.CategoryTotal(cat)
+		ta, tb := a.CategoryTotal(cat), b.CategoryTotal(cat)
 		if ta != tb {
 			return ta > tb
 		}

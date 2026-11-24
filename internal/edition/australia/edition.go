@@ -20,9 +20,9 @@ func (e *AustraliaEditionData) Rules() map[core.Category]core.ScoringRule {
 	return e.rules
 }
 
-// In accordance with official rules, tie breaking is only done through throw & catch score
-func (e *AustraliaEditionData) TieBreaker(all []*core.PlayerState, score int) int {
-	return shared.TieBreak(all, score, core.ThrowCatch)
+// Ties breaking by throw & catch score
+func (e *AustraliaEditionData) GetWinner(sheets []*core.ScoreSheet) int {
+	return shared.GetWinner(sheets, core.ThrowCatch)
 }
 
 func New() *AustraliaEditionData {

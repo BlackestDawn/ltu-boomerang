@@ -71,29 +71,29 @@ func (ui *TextUI) ShowFinalResults(result scoring.SessionResult) {
 	ui.pending = nil
 	ui.mu.Unlock()
 
-	states := result.Ranking
+	scoreSheets := result.Scores
 	header := []string{"Final score"}
-	totals := make([]int, len(states))
-	for p, s := range states {
+	totals := make([]int, len(scoreSheets))
+	for p, s := range scoreSheets {
 		header = append(header, playerName(p, ui.self))
-		totals[p] = s.ScoreSheet.Total()
+		totals[p] = s.Total()
 	}
 
 	// Category totals over the whole game.
 	sheets := make(map[int]map[core.Category]int)
 	numRounds := 0
-	for p, s := range states {
+	for p, s := range scoreSheets {
 		sheets[p] = make(map[core.Category]int)
-		for cat, scores := range s.ScoreSheet.CategoryScores {
-			sheets[p][cat] = s.ScoreSheet.CategoryTotal(cat)
+		for cat, scores := range s.CategoryScores {
+			sheets[p][cat] = s.CategoryTotal(cat)
 			numRounds = max(numRounds, len(scores))
 		}
 	}
 	var catLabels []string
 	var catRows [][]int
 	for _, cat := range presentCategories(sheets) {
-		row := make([]int, len(states))
-		for p := range states {
+		row := make([]int, len(scoreSheets))
+		for p := range scoreSheets {
 			row[p] = sheets[p][cat]
 		}
 		catLabels = append(catLabels, cat.String())
@@ -104,9 +104,9 @@ func (ui *TextUI) ShowFinalResults(result scoring.SessionResult) {
 	var roundLabels []string
 	var roundRows [][]int
 	for r := range numRounds {
-		row := make([]int, len(states))
-		for p, s := range states {
-			for _, scores := range s.ScoreSheet.CategoryScores {
+		row := make([]int, len(scoreSheets))
+		for p, s := range scoreSheets {
+			for _, scores := range s.CategoryScores {
 				if r < len(scores) {
 					row[p] += scores[r]
 				}

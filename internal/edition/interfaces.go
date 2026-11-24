@@ -7,5 +7,5 @@ import (
 type Edition interface {
 	Cards() []*core.Card
 	Rules() map[core.Category]core.ScoringRule
-	TieBreaker(all []*core.PlayerState, score int) int
+	GetWinner(sheets []*core.ScoreSheet) int
 }
