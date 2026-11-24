@@ -24,7 +24,7 @@ func buildControllers(cfg *Config, ui *ui.TextUI, rng *rand.Rand, es core.EventS
 
 	participants := []engine.PlayerController{agent.NewHumanController(ui, es.Subscribe())}
 
-	remotes, err := acceptRemotes(":"+*cfg.Listen, numRemote, numPlayers, *cfg.Rounds, rng, es)
+	remotes, err := acceptRemotes(":"+*cfg.Listen, numRemote, numPlayers, *cfg.Rounds, *cfg.Edition, rng, es)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -41,7 +41,7 @@ func buildControllers(cfg *Config, ui *ui.TextUI, rng *rand.Rand, es core.EventS
 // acceptRemotes waits on addr until count clients have connected and been
 // welcomed. Connections that fail the handshake are dropped and their slot
 // stays open.
-func acceptRemotes(addr string, count, numPlayers, rounds int, rng *rand.Rand, es core.EventServer) ([]*agent.RemoteController, error) {
+func acceptRemotes(addr string, count, numPlayers, rounds int, edition string, rng *rand.Rand, es core.EventServer) ([]*agent.RemoteController, error) {
 	if count <= 0 {
 		return nil, nil
 	}
@@ -59,7 +59,7 @@ func acceptRemotes(addr string, count, numPlayers, rounds int, rng *rand.Rand, e
 			return nil, fmt.Errorf("accepting remote player: %w", err)
 		}
 		seat := len(remotes) + 1
-		if err := handshake(t, seat, numPlayers, rounds); err != nil {
+		if err := handshake(t, seat, numPlayers, rounds, edition); err != nil {
 			fmt.Printf("Dropped connection: %s\n", err)
 			t.Close()
 			continue
@@ -70,8 +70,8 @@ func acceptRemotes(addr string, count, numPlayers, rounds int, rng *rand.Rand, e
 }
 
 // handshake waits for the client's Hello and answers with a Welcome giving it
-// its seat.
-func handshake(t net.Transport, seat, numPlayers, rounds int) error {
+// its seat and the edition being played.
+func handshake(t net.Transport, seat, numPlayers, rounds int, edition string) error {
 	t.SetReadDeadline(time.Now().Add(helloTimeout))
 	defer t.SetReadDeadline(time.Time{})
 
@@ -95,6 +95,7 @@ func handshake(t net.Transport, seat, numPlayers, rounds int) error {
 		Seat:       seat,
 		NumPlayers: numPlayers,
 		Rounds:     rounds,
+		Edition:    edition,
 	})
 	if err != nil {
 		return err

@@ -91,9 +91,10 @@ type HelloData struct {
 }
 
 type WelcomeData struct {
-	Seat       int `json:"seat"`
-	NumPlayers int `json:"numPlayers"`
-	Rounds     int `json:"rounds"`
+	Seat       int    `json:"seat"`
+	NumPlayers int    `json:"numPlayers"`
+	Rounds     int    `json:"rounds"`
+	Edition    string `json:"edition"` // edition identifier, e.g. "AU"
 }
 
 // AskCardData is the payload of both AskThrow and AskDraw.
@@ -124,4 +125,4 @@ type ErrorData struct {
 }
 
 // ProtocolVersion is sent in Hello so mismatched builds can be refused.
-const ProtocolVersion = 1
+const ProtocolVersion = 2

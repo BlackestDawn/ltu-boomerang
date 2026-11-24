@@ -26,7 +26,7 @@ func TestPayloadRoundTrip(t *testing.T) {
 		into any
 	}{
 		{Hello, HelloData{Version: ProtocolVersion}, &HelloData{}},
-		{Welcome, WelcomeData{Seat: 2, NumPlayers: 4, Rounds: 4}, &WelcomeData{}},
+		{Welcome, WelcomeData{Seat: 2, NumPlayers: 4, Rounds: 4, Edition: "EU"}, &WelcomeData{}},
 		{AskDraw, AskCardData{Hand: []core.Card{testCard}}, &AskCardData{}},
 		{AskActivity, AskActivityData{
 			Draft:   []core.Card{testCard},

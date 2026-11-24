@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/BlackestDawn/ltu-boomerang/internal/core"
+	"github.com/BlackestDawn/ltu-boomerang/internal/edition"
 	"github.com/BlackestDawn/ltu-boomerang/internal/net"
 	"github.com/BlackestDawn/ltu-boomerang/internal/scoring"
 	"github.com/BlackestDawn/ltu-boomerang/internal/ui"
@@ -39,6 +40,10 @@ func runClient(connectTo string) error {
 	var welcome net.WelcomeData
 	if msg.Type != net.Welcome || msg.Decode(&welcome) != nil {
 		return fmt.Errorf("unexpected %s from host", msg.Type)
+	}
+	// Loading the edition sets the category names shown on score sheets.
+	if _, err := edition.GetEdition(welcome.Edition); err != nil {
+		return fmt.Errorf("host plays an unsupported edition: %w", err)
 	}
 
 	textUI := ui.NewTextUI(os.Stdout, os.Stdin)

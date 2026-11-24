@@ -32,21 +32,25 @@ func (g *Game) Play() scoring.SessionResult {
 		}
 		wg.Wait()
 
-		// Draw cards until one remaining
+		// Draw cards until one remaining. Picks are revealed only once every
+		// player has chosen, so nobody sees another player's pick in advance.
+		picks := make([]*core.Card, len(g.players))
 		for len(g.playerStates[0].Hand) > 1 {
 			g.PassHands(round, false)
 			for i := range g.players {
 				wg.Go(func() {
-					card := g.players[i].ChooseDraft(g.playerStates[i].Hand)
-					g.playerStates[i].MoveCardToDraft(card)
-					g.events.Publish(core.RevealCardEvent{Player: i, Card: *card})
+					picks[i] = g.players[i].ChooseDraft(g.playerStates[i].Hand)
+					g.playerStates[i].MoveCardToDraft(picks[i])
 				})
 			}
 			wg.Wait()
+			for i, card := range picks {
+				g.events.Publish(core.RevealCardEvent{Player: i, Card: *card})
+			}
 		}
 
 		// One card left, pass it around and automatically add to draft as catch card
-		// Then calculate the rounds scores
+		// Then calculate the round's scores
 		g.PassHands(round, true)
 		for i := range g.players {
 			wg.Go(func() {

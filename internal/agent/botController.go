@@ -11,9 +11,13 @@ type BotController struct {
 	rng *rand.Rand
 }
 
+// NewBotController creates a bot with its own random source, seeded from rng.
+// Bots are asked for their choices concurrently and *rand.Rand is not safe
+// for concurrent use, so several bots may be created from one rng but must
+// not draw from it while playing.
 func NewBotController(rng *rand.Rand) *BotController {
 	return &BotController{
-		rng: rng,
+		rng: rand.New(rand.NewSource(rng.Int63())),
 	}
 }
 

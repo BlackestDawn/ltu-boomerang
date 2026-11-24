@@ -5,7 +5,9 @@ import (
 	"slices"
 	"sync"
 	"testing"
+	"time"
 
+	"github.com/BlackestDawn/ltu-boomerang/internal/agent"
 	"github.com/BlackestDawn/ltu-boomerang/internal/core"
 	"github.com/BlackestDawn/ltu-boomerang/internal/edition/australia"
 )
@@ -378,5 +380,67 @@ func TestPlayReportsWinner(t *testing.T) {
 				t.Errorf("seed %d: tie lost by player %d with more Throw & Catch", seed, p)
 			}
 		}
+	}
+}
+
+// Bots created from one rng are asked concurrently; run with -race to check
+// they don't share its state.
+func TestBotsSharingRNG(t *testing.T) {
+	rng := rand.New(rand.NewSource(1))
+	var players []PlayerController
+	for range core.MaxPlayerCount {
+		players = append(players, agent.NewBotController(rng))
+	}
+	NewGame(australia.New(), players, rng, "left", core.MinRounds, &eventLog{}).Play()
+}
+
+// slowPicker waits before checking how many picks have been revealed, giving
+// the other players time to finish their own picks for this pass.
+type slowPicker struct {
+	recorder
+	log      *eventLog
+	n        int
+	asked    int
+	failures []int
+}
+
+func (s *slowPicker) ChooseThrow(hand []*core.Card) *core.Card {
+	s.asked = 0
+	return s.recorder.ChooseThrow(hand)
+}
+
+func (s *slowPicker) ChooseDraft(hand []*core.Card) *core.Card {
+	time.Sleep(20 * time.Millisecond)
+	s.log.mu.Lock()
+	revealed := 0
+	for _, ev := range s.log.events {
+		switch ev.(type) {
+		case core.RoundBeginsEvent:
+			revealed = 0
+		case core.RevealCardEvent:
+			revealed++
+		}
+	}
+	s.log.mu.Unlock()
+	if revealed != s.asked*s.n {
+		s.failures = append(s.failures, revealed)
+	}
+	s.asked++
+	return s.recorder.ChooseDraft(hand)
+}
+
+// Requirement 7: picks are revealed only after every player has chosen.
+func TestPicksRevealedTogether(t *testing.T) {
+	n := 3
+	log := &eventLog{}
+	slow := &slowPicker{recorder: recorder{rng: rand.New(rand.NewSource(1))}, log: log, n: n}
+	players := []PlayerController{
+		&recorder{rng: rand.New(rand.NewSource(2))},
+		slow,
+		&recorder{rng: rand.New(rand.NewSource(3))},
+	}
+	NewGame(australia.New(), players, rand.New(rand.NewSource(4)), "left", 1, log).Play()
+	if len(slow.failures) > 0 {
+		t.Errorf("picks of the current pass were revealed while a player was still choosing (revealed counts %v)", slow.failures)
 	}
 }
