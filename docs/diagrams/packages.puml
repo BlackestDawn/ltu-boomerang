@@ -2,8 +2,9 @@
 skinparam defaultFontName Arial
 skinparam defaultFontSize 14
 skinparam shadowing false
-skinparam componentStyle rectangle
 skinparam packageStyle folder
+skinparam nodesep 40
+skinparam ranksep 55
 top to bottom direction
 
 package "cmd/boomerang\n<<composition root>>" as main {
@@ -16,9 +17,15 @@ package "net" as net {
 }
 package "engine" as engine {
 }
+package "edition" as edition {
+}
 package "edition/australia" as aus {
 }
-package "edition" as edition {
+package "edition/europe" as eu {
+}
+package "edition/usa" as us {
+}
+package "edition/shared" as shared {
 }
 package "scoring" as scoring {
 }
@@ -29,16 +36,35 @@ main ..> agent
 main ..> ui
 main ..> net
 main ..> engine
-main ..> aus
-agent ..> engine : implements\nPlayerController
+main ..> edition
+main ..> scoring
+main ..> core
+
 agent ..> ui
 agent ..> net
-ui ..> engine : implements\nListener
+agent ..> scoring
+agent ..> core
+agent .[#888888].> engine : <<satisfies>>\nPlayerController
+
+ui ..> scoring
+ui ..> core
 net ..> core
+
 engine ..> edition
+engine ..> scoring
 engine ..> core
-aus ..> edition
-aus ..> scoring
+
+edition ..> aus : registry\n(GetEdition)
+edition ..> eu
+edition ..> us
 edition ..> core
+aus ..> shared
+eu ..> shared
+us ..> shared
+aus ..> core
+eu ..> core
+us ..> core
+shared ..> core
+
 scoring ..> core
 @enduml

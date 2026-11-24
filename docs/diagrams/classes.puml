@@ -11,100 +11,141 @@ left to right direction
 package agent {
   class HumanController
   class BotController
-  class RemoteController
+  class RemoteController {
+    Finish(result SessionResult)
+  }
+  class eventPump {
+    Flush()
+    Wait()
+  }
 }
 package ui {
-  class TextUI
+  class TextUI {
+    OnEvent(e Event)
+    AskForCard(cards, question) int
+    AskForActivity(draft, options, counts) int
+    ShowFinalResults(result)
+  }
 }
 package net {
   interface Transport {
     Send(m Message) error
     Receive() (Message, error)
+    SetReadDeadline(t) error
+    Close() error
   }
   class TCPTransport
+  class Message {
+    Type : MessageType
+    Data : json.RawMessage
+  }
 }
 package engine {
   class Game {
-    Play() Result
+    Play() SessionResult
+    PassHands(round, catch)
+    UpdateEndOfRound()
   }
   interface PlayerController {
-    ChooseThrow(hand) Card
-    ChooseDraft(hand) Card
-    ChooseActivity(options) (Activity, bool)
+    ChooseThrow(hand) *Card
+    ChooseDraft(hand) *Card
+    ChooseActivity(hand, alreadyScored) *Symbol
   }
-  interface Listener {
-    OnEvent(e Event)
-  }
-  class Result {
-    Ranking : []PlayerState
+}
+package scoring {
+  class SessionResult {
+    Scores : []*ScoreSheet
     Winner : int
   }
+  class "ScoreRound()\nScoreFinal()" as ScoringFuncs <<functions>>
 }
 package edition {
   interface Edition {
-    Cards() []Card
-    Rules() []ScoringRule
-    Passing() PassingStrategy
-    Rounds() int
+    Cards() []*Card
+    Rules() map[Category]ScoringRule
+    GetWinner(sheets) int
   }
-  class "australia.Australia" as Australia
+  class "GetEdition(id)" as Registry <<function>>
+  class "australia / europe / usa" as Editions
+  class "shared.ScoringFunc" as ScoringFunc <<adapter>>
 }
 package core {
   interface ScoringRule {
-    Category() Category
-    Score(p, all []PlayerState) int
+    Score(p int, all []*PlayerState) int
   }
   interface PassingStrategy {
     Target(round, seat, n) int
     CatchTarget(round, seat, n) int
   }
+  class "Passing\n(left, right, alternate)" as Passing
+  interface EventServer {
+    Publish(ev Event)
+    Subscribe() <-chan Event
+    CancelSubscription(ch)
+  }
+  interface Event
+  class "RoundBegins, RevealCard,\nRevealDraft, RoundScore" as Events
   class PlayerState {
-    Hand, Draft : []Card
-    VisitedSites, ScoredActivities
+    Hand, Draft : []*Card
+    VisitedSites : []byte
+    ChosenActivity : *Symbol
+    ScoredActivities : []*Symbol
+    MoveCardToDraft(card)
   }
   class ScoreSheet {
+    CategoryScores : map[Category][]int
     Add(round, category, points)
     CategoryTotal(category) int
     Total() int
   }
   class Deck {
     Shuffle(rng)
-    Deal(n) []Card
+    Deal(n) []*Card
   }
   class Card {
-    Name, Site, Region : string
-    Number : int
-    Symbols : map[Category]Symbol
+    Name, Region : string
+    Site : byte
+    Value : int
+    Symbols : map[Category]*Symbol
   }
-}
-package scoring {
-  class "ThrowCatch, Sites, RegionBonus,\nCollections, Animals, Activities" as Rules <<ScoringRule>>
-  class "Clockwise, Alternating (req. 13)" as Passings <<PassingStrategy>>
+  class Symbol {
+    Name : string
+    Value : int
+  }
 }
 
 HumanController ..|> PlayerController
 BotController ..|> PlayerController
 RemoteController ..|> PlayerController
 RemoteController --> Transport
+RemoteController --> BotController : fallback
+RemoteController *-- eventPump
+HumanController *-- eventPump
 HumanController --> TextUI
 TCPTransport ..|> Transport
-TextUI ..|> Listener
+Transport ..> Message
+eventPump ..> EventServer : subscribes
 
 Game --> "2..4" PlayerController
-Game --> Listener
+Game --> EventServer : publishes
 Game --> Edition
+Game --> PassingStrategy
 Game *-- "2..4" PlayerState
-Game ..> Result
 Game --> Deck
+Game ..> ScoringFuncs
+ScoringFuncs ..> SessionResult
 
-Australia ..|> Edition
-Australia ..> Rules : creates
+Registry ..> Edition : returns
+Editions ..|> Edition
+Editions ..> ScoringFunc : builds rules
+ScoringFunc ..|> ScoringRule
 Edition ..> ScoringRule
-Edition ..> PassingStrategy
 
-Rules ..|> ScoringRule
-Passings ..|> PassingStrategy
+Passing ..|> PassingStrategy
+Events ..|> Event
+EventServer ..> Event
 PlayerState *-- ScoreSheet
 PlayerState o-- Card
-Deck o-- "28" Card
+Deck o-- Card
+Card o-- "2" Symbol
 @enduml

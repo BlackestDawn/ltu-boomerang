@@ -2,34 +2,47 @@
 skinparam defaultFontName Arial
 skinparam defaultFontSize 12
 skinparam shadowing false
+skinparam sequenceMessageAlign center
 participant Game
 participant Deck
 participant "PassingStrategy" as PS
-participant "PlayerController\n(each player)" as PC
-participant "ScoringRule\n(each rule)" as SR
-participant "Listener\n(UI / network)" as L
+participant "PlayerController\n(each player, in parallel)" as PC
+participant "scoring" as SC
+participant "ScoringRule\n(each category)" as SR
+participant "EventServer" as ES
+participant "Subscribers\n(TextUI / RemoteController)" as L
 
+Game -> Deck : Deck{edition.Cards()}
 Game -> Deck : Shuffle(rng)
 Game -> Deck : Deal(7) per player
-Game -> L : OnEvent(HandsDealt)
+Game -> ES : Publish(RoundBeginsEvent)
+ES --> L : event
 Game -> PC : ChooseThrow(hand)
-PC --> Game : throw card (hidden)
+PC --> Game : throw card (kept hidden)
 loop until one card remains in each hand
-  Game -> PS : Target(round, seat, players)
+  Game -> PS : Target(round, seat, n)
   PS --> Game : receiving seat
-  Game -> Game : pass hands
+  Game -> Game : PassHands
   Game -> PC : ChooseDraft(hand)
   PC --> Game : drafted card
-  Game -> L : OnEvent(CardsRevealed)
+  Game -> ES : Publish(RevealCardEvent)
+  ES --> L : event
 end
-Game -> PS : CatchTarget(round, seat, players)
+Game -> PS : CatchTarget(round, seat, n)
 PS --> Game : receiving seat
-Game -> Game : add Catch card to draft
-Game -> PC : ChooseActivity(options)
+Game -> Game : PassHands, add Catch card to draft
+Game -> ES : Publish(RevealDraftEvent)
+ES --> L : event
+Game -> PC : ChooseActivity(draft, alreadyScored)
 PC --> Game : activity or none
-loop for each rule
-  Game -> SR : Score(player, allPlayers)
-  SR --> Game : points
+Game -> SC : ScoreRound(round, states, edition.Rules())
+loop for each player and category
+  SC -> SR : Score(player, allStates)
+  SR --> SC : points
+  SC -> SC : ScoreSheet.Add(round, category, points)
 end
-Game -> L : OnEvent(RoundScored)
+SC --> Game : round scores
+Game -> ES : Publish(RoundScoreEvent)
+ES --> L : event
+Game -> Game : UpdateEndOfRound\n(visited sites, scored activities)
 @enduml
