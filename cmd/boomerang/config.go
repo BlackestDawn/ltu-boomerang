@@ -19,14 +19,19 @@ type Config struct {
 }
 
 func buildConfig(args []string) (*Config, error) {
-	parser := argparse.NewParser("boomerang", "Boomerang Cardgame")
+	parser := argparse.NewParser(
+		"boomerang",
+		"Boomerang: a draft-and-write card game for 2-4 players (Australia, Europe and USA editions).\n"+
+			"Run without --connect to host a game: you play as player 1, remote players join over TCP\n"+
+			"and bots fill any empty seats. Run with --connect <address> to join a game someone else is hosting.",
+	)
 
 	edition := parser.Selector(
 		"e",
 		"edition",
 		[]string{"AU", "EU", "US"},
 		&argparse.Options{
-			Help:    "Select which edition to use",
+			Help:    "Edition to play: AU (Australia), EU (Europe), US (USA)",
 			Default: "AU",
 		},
 	)
@@ -35,7 +40,7 @@ func buildConfig(args []string) (*Config, error) {
 		"direction",
 		[]string{"left", "alternate", "right"},
 		&argparse.Options{
-			Help:    "Direction to pass cards during each round",
+			Help:    "Direction hands are passed: left (next player), right (previous player), alternate (switches each round)",
 			Default: "left",
 		},
 	)
@@ -43,7 +48,7 @@ func buildConfig(args []string) (*Config, error) {
 		"p",
 		"players",
 		&argparse.Options{
-			Help:     fmt.Sprintf("Number of players: 1-%d", core.MaxPlayerCount),
+			Help:     fmt.Sprintf("Number of human players including you, %d-%d. Everyone except you joins with --connect", core.MinPlayerCount, core.MaxPlayerCount),
 			Default:  2,
 			Validate: func(args []string) error { return validateCount(args[0], core.MaxPlayerCount, core.MinPlayerCount) },
 		},
@@ -52,7 +57,7 @@ func buildConfig(args []string) (*Config, error) {
 		"b",
 		"bots",
 		&argparse.Options{
-			Help:     "Number of bots, can only fill remaining seats after players and must be 1 if player count is only 1",
+			Help:     fmt.Sprintf("Number of bots to fill empty seats, up to %d. At least 1 is needed when playing alone", core.MaxPlayerCount-1),
 			Default:  0,
 			Validate: func(args []string) error { return validateCount(args[0], core.MaxPlayerCount-*players, 0) },
 		},
@@ -61,14 +66,14 @@ func buildConfig(args []string) (*Config, error) {
 		"c",
 		"connect",
 		&argparse.Options{
-			Help: "Connect to a remote session. If specified no other option will have any effect",
+			Help: fmt.Sprintf("Join a game at <address>[:port] instead of hosting a one (port defaults to %s). All other options are ignored", core.ListenPort),
 		},
 	)
 	listen := parser.String(
 		"l",
 		"listen",
 		&argparse.Options{
-			Help:    "Port to listen for remote players on, used when there are more players than 1",
+			Help:    "Port to wait for remote players on. Only used when there are more than 1 player",
 			Default: core.ListenPort,
 		},
 	)
@@ -76,7 +81,7 @@ func buildConfig(args []string) (*Config, error) {
 		"r",
 		"rounds",
 		&argparse.Options{
-			Help:     fmt.Sprintf("Number of rounds to play: %d-%d", core.MinRounds, core.MaxRounds),
+			Help:     fmt.Sprintf("Number of rounds to play, %d-%d. The standard rules use %d", core.MinRounds, core.MaxRounds, core.MinRounds),
 			Default:  core.MinRounds,
 			Validate: func(args []string) error { return validateCount(args[0], core.MaxRounds, core.MinRounds) },
 		},
