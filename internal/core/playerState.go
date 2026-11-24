@@ -1,7 +1,6 @@
 package core
 
 import (
-	"fmt"
 	"slices"
 )
 
@@ -15,7 +14,6 @@ type PlayerState struct {
 }
 
 func NewPlayerState() *PlayerState {
-	fmt.Println("Initilizing new player state")
 	return &PlayerState{
 		Hand:             []*Card{},
 		Draft:            []*Card{},

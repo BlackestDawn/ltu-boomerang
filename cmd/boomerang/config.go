@@ -66,7 +66,7 @@ func buildConfig(args []string) (*Config, error) {
 		"c",
 		"connect",
 		&argparse.Options{
-			Help: fmt.Sprintf("Join a game at <address>[:port] instead of hosting a one (port defaults to %s). All other options are ignored", core.ListenPort),
+			Help: fmt.Sprintf("Join a game at <address>[:port] instead of hosting one (port defaults to %s). All other options are ignored", core.ListenPort),
 		},
 	)
 	listen := parser.String(
