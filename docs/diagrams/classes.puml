@@ -6,7 +6,7 @@ skinparam classAttributeIconSize 0
 skinparam nodesep 25
 skinparam ranksep 45
 hide empty members
-left to right direction
+top to bottom direction
 
 package agent {
   class HumanController
@@ -148,4 +148,10 @@ PlayerState *-- ScoreSheet
 PlayerState o-- Card
 Deck o-- Card
 Card o-- "2" Symbol
+
+' Layout hints: stack the packages and keep each one narrow.
+TextUI -[hidden]down- Transport
+Message -[hidden]down- Game
+SessionResult -[hidden]down- Registry
+Passing -[hidden]down- EventServer
 @enduml
