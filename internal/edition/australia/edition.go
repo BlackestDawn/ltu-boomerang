@@ -4,6 +4,7 @@ import (
 	"slices"
 
 	"github.com/BlackestDawn/ltu-boomerang/internal/core"
+	"github.com/BlackestDawn/ltu-boomerang/internal/edition/shared"
 )
 
 type AustraliaEditionData struct {
@@ -21,18 +22,7 @@ func (e *AustraliaEditionData) Rules() map[core.Category]core.ScoringRule {
 
 // In accordance with official rules, tie breaking is only done through throw & catch score
 func (e *AustraliaEditionData) TieBreaker(all []*core.PlayerState, score int) int {
-	var topPlayer int
-	topTBScore := -1
-	for id, player := range all {
-		if player.ScoreSheet.Total() == score {
-			throwScore := player.ScoreSheet.CategoryTotal(core.ThrowCatch)
-			if throwScore > topTBScore {
-				topTBScore = throwScore
-				topPlayer = id
-			}
-		}
-	}
-	return topPlayer
+	return shared.TieBreak(all, score, core.ThrowCatch)
 }
 
 func New() *AustraliaEditionData {

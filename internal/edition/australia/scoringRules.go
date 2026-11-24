@@ -1,74 +1,31 @@
 package australia
 
 import (
-	"slices"
-
 	"github.com/BlackestDawn/ltu-boomerang/internal/core"
+	"github.com/BlackestDawn/ltu-boomerang/internal/edition/shared"
 )
-
-type scoringFunc func(p int, all []*core.PlayerState) int
-
-func (s scoringFunc) Score(p int, a []*core.PlayerState) int { return s(p, a) }
 
 func buildRules() map[core.Category]core.ScoringRule {
 	return map[core.Category]core.ScoringRule{
-		core.ThrowCatch:  scoringFunc(scoreThrow),
-		core.Site:        scoringFunc(scoreSite),
-		core.RegionBonus: scoringFunc(scoreRegion),
-		core.Collection:  scoringFunc(scoreCollection),
-		core.Animal:      scoringFunc(scoreAnimal),
-		core.Activity:    scoringFunc(scoreActivity),
+		core.ThrowCatch:  shared.ScoringFunc(shared.ScoreThrowDifference),
+		core.Site:        shared.ScoringFunc(shared.ScoreSites),
+		core.RegionBonus: shared.ScoringFunc(scoreRegion),
+		core.Collection:  shared.ScoringFunc(scoreCollection),
+		core.Animal:      shared.ScoringFunc(scoreAnimal),
+		core.Activity:    shared.ScoringFunc(scoreActivity),
 	}
 }
 
-func scoreThrow(p int, all []*core.PlayerState) int {
-	diff := all[p].Draft[0].Value - all[p].Draft[core.HandSize-1].Value
-	if diff < 0 {
-		return -diff
-	}
-	return diff
-}
-
-func scoreSite(p int, all []*core.PlayerState) int {
-	var score int
-	for _, card := range all[p].Draft {
-		if !slices.Contains(all[p].VisitedSites, card.Site) {
-			score++
-		}
-	}
-	return score
-}
+// Every region is worth 3 points to the first player completing it.
+var regionBonus = []int{3, 3, 3, 3, 3, 3, 3}
 
 func scoreRegion(p int, all []*core.PlayerState) int {
-	var score int
-REGIONSET:
-	for _, set := range regionClusters {
-		for _, state := range all {
-			if core.SliceIsSubset(set, state.VisitedSites) {
-				continue REGIONSET
-			}
-		}
-		allVisited := slices.Clone(all[p].VisitedSites)
-		for _, card := range all[p].Draft {
-			if !slices.Contains(allVisited, card.Site) {
-				allVisited = append(allVisited, card.Site)
-			}
-		}
-		if core.SliceIsSubset(set, allVisited) {
-			score += 3
-		}
-	}
-	return score
+	return shared.ScoreRegions(p, all, regionClusters, regionBonus)
 }
 
+// Collections are doubled when the total is 7 or less.
 func scoreCollection(p int, all []*core.PlayerState) int {
-	var score int
-	for _, card := range all[p].Draft {
-		coll, ok := card.Symbols[core.Collection]
-		if ok {
-			score += coll.Value
-		}
-	}
+	score := shared.SymbolSum(all[p].Draft, core.Collection)
 	if score <= 7 {
 		score = score * 2
 	}
@@ -76,26 +33,11 @@ func scoreCollection(p int, all []*core.PlayerState) int {
 }
 
 func scoreAnimal(p int, all []*core.PlayerState) int {
-	var score int
-	animals := core.FilterSymbolCategoryWithCount(all[p].Draft, core.Animal)
-	for ani, num := range animals {
-		score += ani.Value * (num / 2)
-	}
-	return score
+	return shared.ScorePairs(p, all, core.Animal)
 }
 
 var activityPoints = []int{0, 0, 2, 4, 7, 10, 15}
 
 func scoreActivity(p int, all []*core.PlayerState) int {
-	choice := all[p].ChosenActivity
-	if choice == nil || slices.Contains(all[p].ScoredActivities, choice) {
-		return 0
-	}
-	var count int
-	for _, card := range all[p].Draft {
-		if card.Symbols[core.Activity] == choice {
-			count++
-		}
-	}
-	return activityPoints[count]
+	return shared.ScoreActivityTable(p, all, activityPoints)
 }

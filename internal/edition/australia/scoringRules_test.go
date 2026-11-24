@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/BlackestDawn/ltu-boomerang/internal/core"
+	"github.com/BlackestDawn/ltu-boomerang/internal/edition/shared"
 )
 
 // draft builds a player state whose draft is the cards with the given site
@@ -39,7 +40,7 @@ func TestScoreThrowCatch(t *testing.T) {
 	}
 	for _, c := range cases {
 		p := draft(t, c.sites)
-		if got := scoreThrow(0, []*core.PlayerState{p}); got != c.want {
+		if got := shared.ScoreThrowDifference(0, []*core.PlayerState{p}); got != c.want {
 			t.Errorf("%s: got %d, want %d", c.sites, got, c.want)
 		}
 	}
@@ -49,11 +50,11 @@ func TestScoreThrowCatch(t *testing.T) {
 // do not score again.
 func TestScoreSite(t *testing.T) {
 	p := draft(t, "ABCDEFG")
-	if got := scoreSite(0, []*core.PlayerState{p}); got != 7 {
+	if got := shared.ScoreSites(0, []*core.PlayerState{p}); got != 7 {
 		t.Errorf("fresh sites: got %d, want 7", got)
 	}
 	p.VisitedSites = []byte("ABZ")
-	if got := scoreSite(0, []*core.PlayerState{p}); got != 5 {
+	if got := shared.ScoreSites(0, []*core.PlayerState{p}); got != 5 {
 		t.Errorf("with A, B visited: got %d, want 5", got)
 	}
 }

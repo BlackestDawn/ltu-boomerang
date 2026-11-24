@@ -9,7 +9,7 @@ import (
 
 func buildRules() map[core.Category]core.ScoringRule {
 	return map[core.Category]core.ScoringRule{
-		core.ThrowCatch:  shared.ScoringFunc(scoreThrow),
+		core.ThrowCatch:  shared.ScoringFunc(shared.ScoreThrowDifference),
 		core.Site:        shared.ScoringFunc(shared.ScoreSites),
 		core.RegionBonus: shared.ScoringFunc(scoreRegion),
 		core.Collection:  shared.ScoringFunc(scoreCuisine),
@@ -17,19 +17,6 @@ func buildRules() map[core.Category]core.ScoringRule {
 		core.Activity:    shared.ScoringFunc(scoreTreasure),
 		core.TravelBonus: shared.ScoringFunc(scorePassport),
 	}
-}
-
-// The difference between Throw and Catch.
-func scoreThrow(p int, all []*core.PlayerState) int {
-	draft := all[p].Draft
-	if len(draft) == 0 {
-		return 0
-	}
-	diff := draft[0].Value - draft[len(draft)-1].Value
-	if diff < 0 {
-		return -diff
-	}
-	return diff
 }
 
 func scoreRegion(p int, all []*core.PlayerState) int {

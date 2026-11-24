@@ -12,6 +12,20 @@ type ScoringFunc func(p int, all []*core.PlayerState) int
 
 func (s ScoringFunc) Score(p int, a []*core.PlayerState) int { return s(p, a) }
 
+// ScoreThrowDifference scores the difference between the Throw (first) and
+// Catch (last) card values.
+func ScoreThrowDifference(p int, all []*core.PlayerState) int {
+	draft := all[p].Draft
+	if len(draft) == 0 {
+		return 0
+	}
+	diff := draft[0].Value - draft[len(draft)-1].Value
+	if diff < 0 {
+		return -diff
+	}
+	return diff
+}
+
 // AllVisited returns the sites a player visited in earlier rounds together
 // with the sites in the current draft.
 func AllVisited(state *core.PlayerState) []byte {
