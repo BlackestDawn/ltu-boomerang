@@ -4,8 +4,11 @@ import (
 	"bufio"
 	"encoding/json"
 	"net"
+	"strings"
 	"sync"
 	"time"
+
+	"github.com/BlackestDawn/ltu-boomerang/internal/core"
 )
 
 // DialTimeout is how long Dial waits for the host to answer.
@@ -36,6 +39,9 @@ func NewTransport(conn net.Conn) *TCPTransport {
 
 // Dial connects to a host.
 func Dial(remote string) (*TCPTransport, error) {
+	if !strings.Contains(remote, ":") {
+		remote += ":" + core.ListenPort
+	}
 	conn, err := net.DialTimeout("tcp", remote, DialTimeout)
 	if err != nil {
 		return nil, err
