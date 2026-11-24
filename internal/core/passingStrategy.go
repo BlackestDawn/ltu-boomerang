@@ -10,17 +10,17 @@ func NewPassingStrategy(strategy string) PassingStrategy {
 	case "right":
 		return Passing{
 			target: passRight,
-			catch:  passRight,
+			catch:  passLeft,
 		}
 	case "alternate":
 		return Passing{
 			target: alternate,
-			catch:  alternate,
+			catch:  alternateCatch,
 		}
 	default:
 		return Passing{
 			target: passLeft,
-			catch:  passLeft,
+			catch:  passRight,
 		}
 	}
 }
@@ -51,6 +51,13 @@ func passRight(round, seat, n int) int {
 
 func alternate(round, seat, n int) int {
 	if round%2 == 0 {
+		return passLeft(round, seat, n)
+	}
+	return passRight(round, seat, n)
+}
+
+func alternateCatch(round, seat, n int) int {
+	if round%2 == 1 {
 		return passLeft(round, seat, n)
 	}
 	return passRight(round, seat, n)

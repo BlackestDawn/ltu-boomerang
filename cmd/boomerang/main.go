@@ -16,7 +16,7 @@ import (
 func main() {
 	cfg, err := buildConfig(os.Args)
 	if err != nil {
-		fmt.Printf("Could not initialize config: %s\n", err)
+		fmt.Printf("%s\n", err)
 		os.Exit(1)
 	}
 

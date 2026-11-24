@@ -52,7 +52,7 @@ func buildConfig(args []string) (*Config, error) {
 		"b",
 		"bots",
 		&argparse.Options{
-			Help:     fmt.Sprintf("Number of bots, can only fill remaining \"player\" slots, max would become %d - player count", core.MaxPlayerCount),
+			Help:     "Number of bots, can only fill remaining seats after players and must be 1 if player count is only 1",
 			Default:  0,
 			Validate: func(args []string) error { return validateCount(args[0], core.MaxPlayerCount-*players, 0) },
 		},
@@ -68,7 +68,7 @@ func buildConfig(args []string) (*Config, error) {
 		"l",
 		"listen",
 		&argparse.Options{
-			Help:    "Address to listen for remote players on, used when there are more players than 1",
+			Help:    "Port to listen for remote players on, used when there are more players than 1",
 			Default: core.ListenPort,
 		},
 	)
@@ -84,7 +84,11 @@ func buildConfig(args []string) (*Config, error) {
 
 	err := parser.Parse(args)
 	if err != nil {
-		return nil, fmt.Errorf("%s", parser.Usage(err))
+		return nil, fmt.Errorf("%s", parser.Usage(err.Error()+"\n"))
+	}
+
+	if *players+*bots < 2 {
+		return nil, fmt.Errorf("%s", parser.Usage("Total between players and bots must be at least 2\n"))
 	}
 
 	return &Config{
@@ -105,7 +109,7 @@ func validateCount(input string, max int, min int) error {
 	}
 
 	if count < min || count > max {
-		return fmt.Errorf("Invalid value: %d\n", count)
+		return fmt.Errorf("Invalid value: %d", count)
 	}
 
 	return nil

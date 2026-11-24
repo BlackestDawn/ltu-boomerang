@@ -34,7 +34,7 @@ func (g *Game) Play() scoring.SessionResult {
 
 		// Draw cards until one remaining
 		for len(g.playerStates[0].Hand) > 1 {
-			g.PassHands(round)
+			g.PassHands(round, false)
 			for i := range g.players {
 				wg.Go(func() {
 					card := g.players[i].ChooseDraft(g.playerStates[i].Hand)
@@ -47,7 +47,7 @@ func (g *Game) Play() scoring.SessionResult {
 
 		// One card left, pass it around and automatically add to draft as catch card
 		// Then calculate the rounds scores
-		g.PassHands(round)
+		g.PassHands(round, true)
 		for i := range g.players {
 			wg.Go(func() {
 				g.playerStates[i].MoveCardToDraft(g.playerStates[i].Hand[0])

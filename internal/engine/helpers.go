@@ -6,10 +6,15 @@ import (
 	"github.com/BlackestDawn/ltu-boomerang/internal/core"
 )
 
-func (g *Game) PassHands(round int) {
+func (g *Game) PassHands(round int, catch bool) {
 	targets := make([][]*core.Card, len(g.playerStates))
 	for i := range g.players {
-		to := g.passing.Target(round, i, len(g.playerStates))
+		var to int
+		if !catch {
+			to = g.passing.Target(round, i, len(g.playerStates))
+		} else {
+			to = g.passing.CatchTarget(round, i, len(g.playerStates))
+		}
 		targets[to] = g.playerStates[i].Hand
 	}
 	for i := 0; i < len(g.playerStates); i++ {
