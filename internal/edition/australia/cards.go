@@ -109,11 +109,11 @@ func buildCards() []*core.Card {
 			core.Animal:   cardSymbols[koalas],
 			core.Activity: cardSymbols[sightseeing],
 		}},
-		{Name: "Port Arthur", Site: '*', Region: regionNames[6], Value: 7, Symbols: map[core.Category]*core.Symbol{
+		{Name: "Port Arthur", Site: '@', Region: regionNames[6], Value: 7, Symbols: map[core.Category]*core.Symbol{
 			core.Collection: cardSymbols[leaves],
 			core.Activity:   cardSymbols[indigenous],
 		}},
-		{Name: "Richmond", Site: '-', Region: regionNames[6], Value: 7, Symbols: map[core.Category]*core.Symbol{
+		{Name: "Richmond", Site: '#', Region: regionNames[6], Value: 7, Symbols: map[core.Category]*core.Symbol{
 			core.Animal:   cardSymbols[kangaroos],
 			core.Activity: cardSymbols[swimming],
 		}},
