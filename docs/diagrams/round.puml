@@ -22,15 +22,16 @@ PC --> Game : throw card (kept hidden)
 loop until one card remains in each hand
   Game -> PS : Target(round, seat, n)
   PS --> Game : receiving seat
-  Game -> Game : PassHands
+  Game -> Game : passHands
   Game -> PC : ChooseDraft(hand)
   PC --> Game : drafted card
-  Game -> ES : Publish(RevealCardEvent)
-  ES --> L : event
+  note over Game, PC : picks are revealed only\nonce every player has chosen
+  Game -> ES : Publish(RevealCardEvent) per player
+  ES --> L : events
 end
 Game -> PS : CatchTarget(round, seat, n)
 PS --> Game : receiving seat
-Game -> Game : PassHands, add Catch card to draft
+Game -> Game : passHands, add Catch card to draft
 Game -> ES : Publish(RevealDraftEvent)
 ES --> L : event
 Game -> PC : ChooseActivity(draft, alreadyScored)
@@ -44,5 +45,5 @@ end
 SC --> Game : round scores
 Game -> ES : Publish(RoundScoreEvent)
 ES --> L : event
-Game -> Game : UpdateEndOfRound\n(visited sites, scored activities)
+Game -> Game : updateEndOfRound\n(visited sites, scored activities)
 @enduml

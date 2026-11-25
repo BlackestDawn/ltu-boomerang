@@ -124,7 +124,7 @@ Every test is commented with the requirement number it verifies. The table shows
 | 4 | Each player is dealt 7 unique cards | `internal/core/deck_test.go` `TestDeckDealGivesDisjointHands`, `TestDealSevenUniqueCardsEachRound` |
 | 5 | The throw card is chosen first and stays hidden until the round ends | `TestThrowCardIsHiddenUntilRoundEnd`, `TestMoveCardToDraft` |
 | 6 | Hands are passed to the next player, and the last player passes to the first | `TestHandsPassToNextPlayer`, `TestPassLeftTargetsNextPlayer` |
-| 7–8 | One card is picked and shown per pass until one card remains | `TestDraftedCardsAreShown` |
+| 7–8 | One card is picked and shown per pass until one card remains, and picks are revealed only after every player has chosen | `TestDraftedCardsAreShown`, `TestPicksRevealedTogether` |
 | 9 | The catch card goes to the previous player | `TestCatchCardGoesToPreviousPlayer`, `TestCatchTargetIsOppositeOfPassing` |
 | 10a–e | Throw & catch, sites, region bonus (first to complete and simultaneous), collections, animals and activities (table, one per round, once per game) | `internal/edition/australia/scoringRules_test.go`, `TestUpdateEndOfRound`, `TestScoredActivitiesCarryOver`, `internal/agent/botController_test.go` |
 | 11 | Every round is scored before the next round starts | `TestFourRoundsScored`, `TestScoreRoundAppliesAllRules` |

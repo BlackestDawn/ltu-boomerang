@@ -43,8 +43,8 @@ package net {
 package engine {
   class Game {
     Play() SessionResult
-    PassHands(round, catch)
-    UpdateEndOfRound()
+    -passHands(round, catch)
+    -updateEndOfRound()
   }
   interface PlayerController {
     ChooseThrow(hand) *Card
