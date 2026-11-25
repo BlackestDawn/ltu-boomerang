@@ -70,7 +70,7 @@ func TestValidateCount(t *testing.T) {
 		{"2", true}, {"4", true}, {"1", false}, {"5", false}, {"x", false},
 	}
 	for _, c := range cases {
-		if err := validateCount(c.in, 4, 2); (err == nil) != c.ok {
+		if err := validateCount(c.in, 2, 4); (err == nil) != c.ok {
 			t.Errorf("validateCount(%q) error = %v, want ok=%v", c.in, err, c.ok)
 		}
 	}

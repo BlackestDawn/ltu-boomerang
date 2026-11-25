@@ -168,7 +168,7 @@ func TestScoreAnimal(t *testing.T) {
 // Requirement 10e: activity table 1->0, 2->2, 3->4, 4->7, 5->10, 6->15.
 func TestScoreActivityTable(t *testing.T) {
 	swim := cardSymbols[swimming]
-	swimSites := "HLNSW-" // the six swimming cards
+	swimSites := "HLNSW#" // the six swimming cards
 	want := []int{0, 2, 4, 7, 10, 15}
 	for n := 1; n <= 6; n++ {
 		p := draft(t, swimSites[:n]+"ABCDEFG"[:7-n])

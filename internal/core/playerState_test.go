@@ -7,7 +7,7 @@ import (
 
 func TestMoveCardToDraft(t *testing.T) {
 	a, b, c := &Card{Name: "A"}, &Card{Name: "B"}, &Card{Name: "C"}
-	p := NewPlayerState()
+	p := NewPlayerState(MinRounds)
 	p.Hand = []*Card{a, b, c}
 
 	p.MoveCardToDraft(b)
@@ -37,6 +37,34 @@ func TestScoreSheetTotals(t *testing.T) {
 	}
 	if got := s.Total(); got != 12 {
 		t.Errorf("total %d, want 12", got)
+	}
+}
+
+// Add writes by round index. Slices grow only up to the round written, so
+// their length is the number of rounds recorded, which scoring rules read.
+func TestScoreSheetAddByRound(t *testing.T) {
+	s := NewScoreSheet(MinRounds)
+	s.Add(0, Site, 3)
+	if got := s.CategoryScores[Site]; !slices.Equal(got, []int{3}) {
+		t.Errorf("after round 0: %v, want [3]", got)
+	}
+	s.Add(2, Site, 5)
+	if got := s.CategoryScores[Site]; !slices.Equal(got, []int{3, 0, 5}) {
+		t.Errorf("skipped round: %v, want [3 0 5]", got)
+	}
+	s.Add(0, Site, 4)
+	if got := s.CategoryScores[Site]; !slices.Equal(got, []int{4, 0, 5}) {
+		t.Errorf("rewritten round: %v, want [4 0 5]", got)
+	}
+	if got := s.CategoryTotal(Site); got != 9 {
+		t.Errorf("total %d, want 9", got)
+	}
+
+	// A zero-value sheet works too.
+	var z ScoreSheet
+	z.Add(1, Animal, 2)
+	if got := z.CategoryScores[Animal]; !slices.Equal(got, []int{0, 2}) {
+		t.Errorf("zero-value sheet: %v, want [0 2]", got)
 	}
 }
 

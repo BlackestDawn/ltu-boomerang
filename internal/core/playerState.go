@@ -13,16 +13,14 @@ type PlayerState struct {
 	ScoreSheet       *ScoreSheet
 }
 
-func NewPlayerState() *PlayerState {
+func NewPlayerState(rounds int) *PlayerState {
 	return &PlayerState{
 		Hand:             []*Card{},
 		Draft:            []*Card{},
 		VisitedSites:     make([]byte, 0),
 		ChosenActivity:   nil,
 		ScoredActivities: make([]*Symbol, 0),
-		ScoreSheet: &ScoreSheet{
-			CategoryScores: make(map[Category][]int),
-		},
+		ScoreSheet:       NewScoreSheet(rounds),
 	}
 }
 

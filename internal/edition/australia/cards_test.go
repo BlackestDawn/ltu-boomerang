@@ -42,8 +42,8 @@ var expectedCards = []struct {
 	{"Royal Exhibition Building", 'X', "Victoria", 2, "Leaves", "Platypuses", ""},
 	{"Salamanca Markets", 'Y', "Tasmania", 7, "Leaves", "Emus", ""},
 	{"Mount Wellington", 'Z', "Tasmania", 7, "", "Koalas", "Sightseeing"},
-	{"Port Arthur", '*', "Tasmania", 7, "Leaves", "", "Indigenous Culture"},
-	{"Richmond", '-', "Tasmania", 7, "", "Kangaroos", "Swimming"},
+	{"Port Arthur", '@', "Tasmania", 7, "Leaves", "", "Indigenous Culture"},
+	{"Richmond", '#', "Tasmania", 7, "", "Kangaroos", "Swimming"},
 }
 
 // expectedSymbolValues are the point values from requirement 10c and 10d.

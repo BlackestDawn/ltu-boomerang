@@ -293,7 +293,7 @@ func TestCatchCardGoesToPreviousPlayer(t *testing.T) {
 func TestUpdateEndOfRound(t *testing.T) {
 	cards := australia.New().Cards()
 	swim := &core.Symbol{Name: "Swimming"}
-	state := core.NewPlayerState()
+	state := core.NewPlayerState(core.MinRounds)
 	state.VisitedSites = []byte{cards[0].Site}
 	state.Draft = cards[:3]
 	state.ChosenActivity = swim

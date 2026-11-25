@@ -21,7 +21,7 @@ type Game struct {
 func NewGame(ed edition.Edition, players []PlayerController, rng *rand.Rand, passingDir string, rounds int, events core.Publisher) *Game {
 	var states []*core.PlayerState
 	for range players {
-		states = append(states, core.NewPlayerState())
+		states = append(states, core.NewPlayerState(rounds))
 	}
 	return &Game{
 		players:      players,

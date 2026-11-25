@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/BlackestDawn/ltu-boomerang/internal/core"
+	"github.com/BlackestDawn/ltu-boomerang/internal/scoring"
 )
 
 func draft(t *testing.T, sites string) *core.PlayerState {
@@ -171,5 +172,34 @@ func TestGetWinner(t *testing.T) {
 	}
 	if got := ed.GetWinner([]*core.ScoreSheet{sheet(3, 1, 16), sheet(3, 5, 12)}); got != 1 {
 		t.Errorf("then throw & catch: winner %d, want 1", got)
+	}
+}
+
+// Rules read earlier rounds from the score sheet. Score through
+// scoring.ScoreRound with sheets from core.NewScoreSheet, as a real game does.
+func TestRulesReadEarlierRoundsFromScoreSheet(t *testing.T) {
+	// Americana: 6 last round, 6 again now, so nothing.
+	p := draft(t, "DW")
+	p.ScoreSheet = core.NewScoreSheet(core.MinRounds)
+	p.ScoreSheet.Add(0, core.Collection, 6)
+	if got := scoreAmericana(0, []*core.PlayerState{p}); got != 0 {
+		t.Errorf("americana not beating last round: got %d, want 0", got)
+	}
+
+	// Coast to coast: both players connect in round 1, so both get 7 even
+	// though player 0's entry for round 1 is written first.
+	route := "BGHJLKRST"
+	all := []*core.PlayerState{draft(t, route[5:]), draft(t, route[3:])}
+	all[0].VisitedSites = []byte(route[:5])
+	all[1].VisitedSites = []byte(route[:3])
+	for _, s := range all {
+		s.ScoreSheet = core.NewScoreSheet(core.MinRounds)
+		s.ScoreSheet.Add(0, core.TravelBonus, 0)
+	}
+	result := scoring.ScoreRound(1, all, buildRules())
+	for i := range all {
+		if got := result[i][core.TravelBonus]; got != 7 {
+			t.Errorf("same round player %d: got %d, want 7", i, got)
+		}
 	}
 }
